@@ -1,21 +1,34 @@
 {
-  "name": "yvml-interactive-map",
-  "module": "index.ts",
-  "type": "module",
-  "private": true,
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build"
-  },
-  "devDependencies": {
-    "@types/bun": "latest",
-    "@types/leaflet": "^1.9.21",
-    "vite": "^7.3.1"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  },
-  "dependencies": {
-    "leaflet": "^1.9.4"
-  }
+    "name": "yvml-interactive-map",
+    "module": "index.ts",
+    "type": "module",
+    "private": true,
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
+        "format": "prettier --write .",
+        "format:check": "prettier --check ."
+    },
+    "devDependencies": {
+        "@types/bun": "latest",
+        "@types/eslint": "^9.6.1",
+        "@types/leaflet": "^1.9.21",
+        "@typescript-eslint/eslint-plugin": "^8.54.0",
+        "@typescript-eslint/parser": "^8.54.0",
+        "eslint": "^10.0.0",
+        "eslint-config-prettier": "^10.1.8",
+        "eslint-plugin-prettier": "^5.5.5",
+        "jiti": "^2.6.1",
+        "prettier": "^3.8.1",
+        "typescript-eslint": "^8.54.0",
+        "vite": "^7.3.1"
+    },
+    "peerDependencies": {
+        "typescript": "^5"
+    },
+    "dependencies": {
+        "leaflet": "^1.9.4"
+    }
 }
