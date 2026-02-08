@@ -3,15 +3,15 @@ import L from "leaflet";
 
 type MapConfiguartion = {
     POIs: Array<POI>;
-    initialLocation?: [number, number];
-    initialZoom?: number;
+    initialLocation: [number, number];
+    initialZoom: number;
 };
 
 export const initMap = (config: MapConfiguartion) => {
     // TODO: make vertical
     const map = L.map("map").setView(
-        config.initialLocation ?? [34.1820592, -116.416779],
-        config.initialZoom ?? 50,
+        config.initialLocation,
+        config.initialZoom,
     );
 
     //L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -22,13 +22,16 @@ export const initMap = (config: MapConfiguartion) => {
     L.tileLayer(
         "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
         {
+            maxZoom: 30,
+            maxNativeZoom: 17,
             attribution:
                 "Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community",
         },
     ).addTo(map);
 
-    L.marker([34.19, -116.416779])
-        .addTo(map)
-        .bindPopup("Hello world")
-        .openPopup();
+    config.POIs.forEach((entry) => {
+        const { lattitude, longitude } = entry.location;
+
+        L.marker([lattitude, longitude]).addTo(map).bindPopup(entry.title);
+    });
 };
