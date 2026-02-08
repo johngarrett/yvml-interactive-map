@@ -1,5 +1,7 @@
 import type { POI } from "../types";
 import L from "leaflet";
+import { poiIcon } from "./components/poi-icon";
+import { poiPopup } from "./components/poi-popup";
 
 type MapConfiguartion = {
     POIs: Array<POI>;
@@ -29,9 +31,13 @@ export const initMap = (config: MapConfiguartion) => {
         },
     ).addTo(map);
 
-    config.POIs.forEach((entry) => {
+    config.POIs.forEach((entry, index) => {
         const { lattitude, longitude } = entry.location;
 
-        L.marker([lattitude, longitude]).addTo(map).bindPopup(entry.title);
+        L.marker([lattitude, longitude], {
+            icon: poiIcon({ number: index, title: entry.title }),
+        })
+            .addTo(map)
+            .bindPopup(poiPopup(entry));
     });
 };
