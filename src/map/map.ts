@@ -1,7 +1,7 @@
 import type { POI } from "../types";
 import L, { TileLayer } from "leaflet";
 import { poiMarker } from "./components/poi-marker";
-import { poiPopup } from "./components/poi-popup";
+import { miniPlayerInstance } from "../miniplayer";
 
 type MapConfiguartion = {
     POIs: Array<POI>;
@@ -34,7 +34,8 @@ export const initMap = (config: MapConfiguartion) => {
             .addTo(map)
             .on("click", (info) => {
                 console.log("clicked", info);
-            })
-            .bindPopup(poiPopup(entry));
+                miniPlayerInstance.display(entry);
+            });
+        //.bindPopup(poiPopup(entry));
     });
 };

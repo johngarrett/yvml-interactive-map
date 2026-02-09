@@ -14,3 +14,42 @@
   border-style: solid;
   border-width: 1px;
 }
+
+.hidden {
+  display: none;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+}
+
+#map {
+  width: 100%;
+  height: 100vh;
+}
+
+#mini-player {
+  position: fixed;
+
+  left: max(16px, env(safe-area-inset-left));
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(16px, env(safe-area-inset-bottom));
+
+  /*
+   * on desktop don't take full width;
+   * TODO: make sure this doesnt conflict with ^
+   */
+  max-width: 500px;
+
+  z-index: 1000;
+
+  background: white;
+  border-radius: 12px;
+}
+
+#mini-player-close {
+  height: 30px;
+  width: 30px;
+}
