@@ -1,5 +1,5 @@
 import { markerIdForPOI } from "../map/components/poi-marker";
-import { miniPlayerInstance } from "../miniplayer";
+import { miniPlayerInstance } from "../mini-player";
 import type { POI } from "../types";
 import { getElementOrThrow } from "../utils";
 
