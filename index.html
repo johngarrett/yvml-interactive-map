@@ -20,8 +20,14 @@
 <body>
   <div id="map"></div>
 
-  <div id="miniplayer" class="hidden">
-    <div id="title"></div>
+  <div id="mini-player" class="hidden">
+    <div class="flex place-content-between">
+      <div id="mini-player-title"></div>
+      <button id="mini-player-close"
+        class="p-2 text-gray-400 rounded-full hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500">
+        X
+      </button>
+    </div>
   </div>
 
   <!-- Vite will inject compiled JS here -->
