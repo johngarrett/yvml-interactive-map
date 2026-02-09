@@ -1,38 +1,26 @@
 import { poiTrackerInstance } from "../points";
 import type { POI } from "../types";
+import { getElementOrThrow } from "../utils";
 
 export class MiniPlayer {
     constructor() {
-        const closeButton = document.getElementById("mini-player-close");
-        if (!closeButton) {
-            throw Error("no close button element found");
-        }
-
-        closeButton.addEventListener("click", () => {
-            this.close();
-        });
+        getElementOrThrow({ id: "mini-player-close" }).addEventListener(
+            "click",
+            () => {
+                this.close();
+            },
+        );
     }
     display(entry: POI) {
-        const element = document.getElementById("mini-player");
-        if (!element) {
-            throw Error("no mini-player element found");
-        }
-
-        const titleElement = document.getElementById("mini-player-title");
-        if (!titleElement) {
-            throw Error("no titleElement found");
-        }
+        const element = getElementOrThrow({ id: "mini-player" });
+        const titleElement = getElementOrThrow({ id: "mini-player-title" });
 
         titleElement.textContent = entry.title;
-        element?.classList.remove("hidden");
+        element.classList.remove("hidden");
     }
 
     close() {
-        const element = document.getElementById("mini-player");
-        if (!element) {
-            throw Error("no mini-player element found");
-        }
-        element.classList.add("hidden");
+        getElementOrThrow({ id: "mini-player" }).classList.add("hidden");
 
         /**
          * TODO: this dependency chain seems weird.

@@ -1,6 +1,7 @@
 import { markerIdForPOI } from "../map/components/poi-marker";
 import { miniPlayerInstance } from "../miniplayer";
 import type { POI } from "../types";
+import { getElementOrThrow } from "../utils";
 
 export class POITracker {
     select(poi: POI) {
@@ -14,11 +15,7 @@ export class POITracker {
         this.viewed.add(poi);
         console.log(this.viewed);
 
-        // TODO: helper fn
-        const poiMarker = document.getElementById(markerIdForPOI(poi));
-        if (!poiMarker) {
-            throw Error("missing POI marker");
-        }
+        const poiMarker = getElementOrThrow({ id: markerIdForPOI(poi) });
 
         miniPlayerInstance.display(poi);
 
