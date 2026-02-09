@@ -17,10 +17,14 @@ export class MiniPlayer {
 
         titleElement.textContent = entry.title;
         element.classList.remove("hidden");
+        this.hidden = false;
     }
 
     close() {
+        // TODO: hidden check here?
+
         getElementOrThrow({ id: "mini-player" }).classList.add("hidden");
+        this.hidden = true;
 
         /**
          * TODO: this dependency chain seems weird.
@@ -28,9 +32,14 @@ export class MiniPlayer {
          * POITracker select triggers MiniPlayer display
          *
          * MiniPlayer close triggers POITracker's deselectActive
+         *
+         *
+         * and now POITracker also calls this fn
          */
         poiTrackerInstance.deselectActive();
     }
+
+    public hidden: boolean = true;
 }
 
 export const miniPlayerInstance = new MiniPlayer();

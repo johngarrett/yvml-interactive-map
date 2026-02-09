@@ -13,7 +13,6 @@ export class POITracker {
         }
 
         this.viewed.add(poi);
-        console.log(this.viewed);
 
         const poiMarker = getElementOrThrow({ id: markerIdForPOI(poi) });
 
@@ -24,6 +23,9 @@ export class POITracker {
 
     deselectActive() {
         this.activePOI = undefined;
+        if (!miniPlayerInstance.hidden) {
+            miniPlayerInstance.close();
+        }
     }
 
     private activePOI: POI | undefined = undefined;

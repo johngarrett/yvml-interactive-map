@@ -12,10 +12,12 @@ type MapConfiguartion = {
 };
 
 export const initMap = (config: MapConfiguartion) => {
-    const map = L.map("map").setView(
-        config.initialLocation,
-        config.initialZoom,
-    );
+    const map = L.map("map")
+        .setView(config.initialLocation, config.initialZoom)
+        .on("click", () => {
+            // deselect the active POI when the user clicks outside on the map
+            poiTrackerInstance.deselectActive();
+        });
 
     config.defaultLayer.addTo(map);
 
