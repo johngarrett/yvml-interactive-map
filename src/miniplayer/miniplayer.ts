@@ -1,3 +1,4 @@
+import { poiTrackerInstance } from "../points";
 import type { POI } from "../types";
 
 export class MiniPlayer {
@@ -32,6 +33,15 @@ export class MiniPlayer {
             throw Error("no mini-player element found");
         }
         element.classList.add("hidden");
+
+        /**
+         * TODO: this dependency chain seems weird.
+         *
+         * POITracker select triggers MiniPlayer display
+         *
+         * MiniPlayer close triggers POITracker's deselectActive
+         */
+        poiTrackerInstance.deselectActive();
     }
 }
 

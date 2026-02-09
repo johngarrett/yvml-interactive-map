@@ -1,7 +1,6 @@
 import type { POI } from "../types";
 import L, { TileLayer } from "leaflet";
 import { poiMarker } from "./components/poi-marker";
-import { miniPlayerInstance } from "../miniplayer";
 import { poiTrackerInstance } from "../points";
 
 type MapConfiguartion = {
@@ -26,16 +25,15 @@ export const initMap = (config: MapConfiguartion) => {
         L.control.layers(config.layers).addTo(map);
     }
 
-    config.POIs.forEach((entry, index) => {
-        const { lattitude, longitude } = entry.location;
+    config.POIs.forEach((POI, index) => {
+        const { lattitude, longitude } = POI.location;
 
         L.marker([lattitude, longitude], {
-            icon: poiMarker({ number: index + 1, title: entry.title }),
+            icon: poiMarker({ number: index + 1, POI }),
         })
             .addTo(map)
             .on("click", () => {
-                poiTrackerInstance.markViewed(entry);
-                miniPlayerInstance.display(entry);
+                poiTrackerInstance.select(POI);
             });
     });
 };

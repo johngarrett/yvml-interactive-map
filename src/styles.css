@@ -1,51 +1,51 @@
 @import "tailwindcss";
 
 .poi-marker {
-  background-color: white;
-  padding: 4px;
-  border-radius: 100%;
+    background-color: white;
+    padding: 4px;
+    border-radius: 100%;
 
-  text-align: center;
-  align-content: center;
-  height: 30px;
-  width: 30px;
+    text-align: center;
+    align-content: center;
+    height: 30px;
+    width: 30px;
 }
 
 .hidden {
-  display: none;
+    display: none;
 }
 
 html,
 body {
-  margin: 0;
-  height: 100%;
+    margin: 0;
+    height: 100%;
 }
 
 #map {
-  width: 100%;
-  height: 100vh;
+    width: 100%;
+    height: 100vh;
 }
 
 #mini-player {
-  position: fixed;
+    position: fixed;
 
-  left: max(16px, env(safe-area-inset-left));
-  right: max(16px, env(safe-area-inset-right));
-  bottom: max(16px, env(safe-area-inset-bottom));
+    left: max(16px, env(safe-area-inset-left));
+    right: max(16px, env(safe-area-inset-right));
+    bottom: max(16px, env(safe-area-inset-bottom));
 
-  /*
+    /*
    * on desktop don't take full width;
    * TODO: make sure this doesnt conflict with ^
    */
-  max-width: 500px;
+    max-width: 500px;
 
-  z-index: 1000;
+    z-index: 1000;
 
-  background: white;
-  border-radius: 12px;
+    background: white;
+    border-radius: 12px;
 }
 
 #mini-player-close {
-  height: 30px;
-  width: 30px;
+    height: 30px;
+    width: 30px;
 }

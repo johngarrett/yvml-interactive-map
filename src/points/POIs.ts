@@ -5,6 +5,7 @@ import type { POI } from "../types";
 export const POIs: Array<POI> = [
     {
         title: "Parking Lot",
+        id: "parking-lot",
         location: {
             lattitude: 34.181922,
             longitude: -116.414579,
@@ -12,6 +13,7 @@ export const POIs: Array<POI> = [
     },
     {
         title: "Quonset",
+        id: "quonset",
         location: {
             lattitude: 34.181792,
             longitude: -116.414532,
@@ -19,6 +21,7 @@ export const POIs: Array<POI> = [
     },
     {
         title: "Foundary",
+        id: "foundary",
         location: {
             lattitude: 34.181725,
             longitude: -116.414696,
@@ -26,6 +29,7 @@ export const POIs: Array<POI> = [
     },
     {
         title: "Outdoor Shower & Concrete Cubes",
+        id: "outdoor-shower",
         location: {
             lattitude: 34.181759,
             longitude: -116.414433,
@@ -33,6 +37,7 @@ export const POIs: Array<POI> = [
     },
     {
         title: "Airstream Trailer",
+        id: "airstream",
         location: {
             lattitude: 34.181665,
             longitude: -116.414396,
@@ -40,6 +45,7 @@ export const POIs: Array<POI> = [
     },
     {
         title: "Sleeping Library",
+        id: "library",
         location: {
             lattitude: 34.18181,
             longitude: -116.41425,
@@ -47,6 +53,7 @@ export const POIs: Array<POI> = [
     },
     {
         title: "Concrete Fountain",
+        id: "fountain",
         location: {
             lattitude: 34.1819,
             longitude: -116.414152,
@@ -54,6 +61,7 @@ export const POIs: Array<POI> = [
     },
     {
         title: "Lazy Eye Gallery",
+        id: "gallery",
         location: {
             lattitude: 34.181959,
             longitude: -116.414309,
@@ -61,6 +69,7 @@ export const POIs: Array<POI> = [
     },
     {
         title: "Heidi & Derek's Studio",
+        id: "heidi-derek-studio",
         location: {
             lattitude: 34.181909,
             longitude: -116.414384,
@@ -68,6 +77,7 @@ export const POIs: Array<POI> = [
     },
     {
         title: "Recording Studio",
+        id: "recording-studio",
         location: {
             lattitude: 34.181869,
             longitude: -116.414445,
@@ -75,6 +85,7 @@ export const POIs: Array<POI> = [
     },
     {
         title: "Sculpture Garden",
+        id: "sculpture-garden",
         location: {
             lattitude: 34.182357,
             longitude: -116.41468,
@@ -82,6 +93,7 @@ export const POIs: Array<POI> = [
     },
     {
         title: "Chicken Wire Dinosaur",
+        id: "chicken-wire-dinosaur",
         location: {
             lattitude: 34.182057,
             longitude: -116.413928,
