@@ -9,7 +9,7 @@ export const poiIcon = (config: IconConfiguartion): DivIcon =>
     divIcon({
         className: "poi-marker-wrapper",
         html: `
-            <div class="poi-marker">
+            <div class="font-bold poi-marker">
               ${config.title}
             </div>
             `,
