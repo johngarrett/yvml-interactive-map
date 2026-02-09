@@ -1,6 +1,6 @@
 import { mapLayers } from "./map/layers";
 import { initMap } from "./map/map";
-import { POIs } from "./map/POIs";
+import { POIs } from "./points";
 
 import "./styles.css";
 
