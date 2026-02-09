@@ -5,7 +5,7 @@ type IconConfiguartion = {
     number: number;
 };
 
-export const poiIcon = (config: IconConfiguartion): DivIcon =>
+export const poiMarker = (config: IconConfiguartion): DivIcon =>
     divIcon({
         className: "poi-marker-wrapper",
         html: `
@@ -13,6 +13,6 @@ export const poiIcon = (config: IconConfiguartion): DivIcon =>
               ${config.title}
             </div>
             `,
-        iconSize: [40, 40],
+        iconSize: [100, 40],
         iconAnchor: [20, 40],
     });

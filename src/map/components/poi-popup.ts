@@ -7,6 +7,5 @@ type PopupConfiguartion = {
  */
 export const poiPopup = (config: PopupConfiguartion): string =>
     `<div>
-       <div class="poi-circle">1</div>
        <div class="poi-label">${config.title}</div>
     </div>`;

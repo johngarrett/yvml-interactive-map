@@ -1,1 +1,16 @@
 @import "tailwindcss";
+
+.poi-marker {
+  background-color: white;
+  padding: 8px;
+  border-radius: 10px;
+  border: red;
+  border-style: solid;
+  border-width: 1px;
+}
+
+.poi-marker-wrapper {
+  border: blue;
+  border-style: solid;
+  border-width: 1px;
+}
