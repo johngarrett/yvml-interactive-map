@@ -28,7 +28,7 @@ jobs:
 
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: docs # TODO: change to dist if this works
+          path: dist
 
   deploy:
     environment:
