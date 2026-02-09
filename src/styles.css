@@ -48,3 +48,8 @@ body {
   background: white;
   border-radius: 12px;
 }
+
+#mini-player-close {
+  height: 30px;
+  width: 30px;
+}
