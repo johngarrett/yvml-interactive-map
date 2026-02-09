@@ -1,5 +1,5 @@
 import type { POI } from "../types";
-import L, { TileLayer } from "leaflet";
+import L, { TileLayer, type MapOptions } from "leaflet";
 import { poiMarker } from "./components/poi-marker";
 import { poiTrackerInstance } from "../points";
 
@@ -12,7 +12,15 @@ type MapConfiguartion = {
 };
 
 export const initMap = (config: MapConfiguartion) => {
-    const map = L.map("map")
+    const map = L.map(
+        "map",
+        {
+            rotate: true,
+            bearing: 180, // start upside down
+            touchRotate: true,
+            rotateControl: undefined,
+        } as unknown as MapOptions /* these come from the extension */,
+    )
         .setView(config.initialLocation, config.initialZoom)
         .on("click", () => {
             // deselect the active POI when the user clicks outside on the map

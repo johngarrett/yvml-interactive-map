@@ -4,6 +4,8 @@ import { POIs } from "./points";
 
 import "./styles.css";
 
+import "leaflet-rotate";
+
 initMap({
     POIs,
     initialLocation: [34.181983, -116.414443],
