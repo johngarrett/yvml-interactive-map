@@ -1,40 +1,38 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <title>YVML Map</title>
 
-        <link
-            rel="stylesheet"
-            href="https://unpkg.com/leaflet/dist/leaflet.css"
-        />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>YVML Map</title>
 
-        <style>
-            html,
-            body,
-            #map {
-                height: 100%;
-                margin: 0;
-            }
-        </style>
-    </head>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 
-    <body>
-        <div id="map"></div>
+  <style>
+    html,
+    body,
+    #map {
+      height: 100%;
+      margin: 0;
+    }
+  </style>
+</head>
 
-        <div id="mini-player" class="hidden">
-            <div class="flex place-content-between">
-                <div id="mini-player-title" class="m-5"></div>
-                <button
-                    id="mini-player-close"
-                    class="hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
-                >
-                    X
-                </button>
-            </div>
-        </div>
+<body>
+  <div id="map"></div>
 
-        <!-- Vite will inject compiled JS here -->
-        <script type="module" src="/src/main.ts"></script>
-    </body>
+  <div id="mini-player" class="hidden">
+    <div class="flex place-content-between">
+      <div id="mini-player-title" class="m-5"></div>
+      <button id="mini-player-close"
+        class="hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500">
+        X
+      </button>
+    </div>
+  </div>
+
+  <!-- Vite will inject compiled JS here -->
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
 </html>

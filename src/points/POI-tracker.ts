@@ -18,7 +18,7 @@ export class POITracker {
 
         miniPlayerInstance.display(poi);
 
-        poiMarker.style.opacity = "0.5";
+        poiMarker.style.opacity = "0.7";
     }
 
     deselectActive() {
