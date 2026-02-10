@@ -46,4 +46,18 @@ export const initMap = (config: MapConfiguartion) => {
                 poiTrackerInstance.select(POI);
             });
     });
+
+    map.locate({
+        /* watch: true */
+    });
+
+    map.on("locationerror", (e) => {
+        console.error(e);
+    });
+    map.on("locationfound", (e) => {
+        // TODO: remove previous circle, get orientation
+        const radius = e.accuracy;
+
+        L.circle(e.latlng, { radius }).addTo(map);
+    });
 };
