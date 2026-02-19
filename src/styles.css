@@ -45,11 +45,12 @@ body {
   z-index: 1000;
 
   background: white;
-  border-radius: 12px;
 }
 
 #mini-player-title {
   font-weight: bold;
+  background-color: black;
+  color: white;
   font-size: xx-large;
   margin: 1;
 }
