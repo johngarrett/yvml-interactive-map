@@ -1,7 +1,11 @@
 import { poiTrackerInstance } from "../points";
+import { LocalStorageProvider } from "../storage";
 import type { POI } from "../types";
 import { getElementOrThrow } from "../utils";
 
+const getPlaybackKey = (entry: POI) => {
+    return `${entry.id}-timestamp`;
+};
 export class MiniPlayer {
     constructor() {
         getElementOrThrow({ id: "mini-player-close" }).addEventListener(
@@ -19,6 +23,8 @@ export class MiniPlayer {
     }
 
     display(entry: POI) {
+        this.activeEntry = entry;
+
         this.elements.title.textContent = entry.title;
 
         if (entry.imageName) {
@@ -30,7 +36,16 @@ export class MiniPlayer {
 
         if (entry.audioName) {
             this.elements.audio.pause();
-            this.elements.audio.currentTime = 0; // TODO: save current time in local storage for each track?
+
+            const playbackKey = getPlaybackKey(entry);
+
+            if (LocalStorageProvider.has(playbackKey)) {
+                this.elements.audio.currentTime = JSON.parse(
+                    LocalStorageProvider.getOrThrow(playbackKey),
+                ) as number;
+            } else {
+                this.elements.audio.currentTime = 0;
+            }
 
             this.elements.audio.src = `${import.meta.env.BASE_URL}audio/${entry.audioName}`;
             this.elements.audio.load();
@@ -47,6 +62,17 @@ export class MiniPlayer {
         this.elements.container.classList.add("hidden");
         this.hidden = true;
         this.elements.audio.pause();
+
+        if (this.activeEntry) {
+            const playbackKey = getPlaybackKey(this.activeEntry);
+            LocalStorageProvider.set(
+                playbackKey,
+                JSON.stringify(this.elements.audio.currentTime),
+            );
+        } else {
+            console.error("no active on close");
+        }
+
         this.elements.audio.currentTime = 0;
 
         /**
@@ -63,6 +89,9 @@ export class MiniPlayer {
     }
 
     public hidden: boolean = true;
+
+    // TODO: bad coupling...
+    private activeEntry?: POI = undefined;
 
     private elements: {
         audio: HTMLAudioElement;
