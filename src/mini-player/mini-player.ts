@@ -10,51 +10,47 @@ export class MiniPlayer {
                 this.close();
             },
         );
-        this.audioElement = getElementOrThrow({
-            id: "mini-player-audio-element",
-        });
+        this.elements = {
+            audio: getElementOrThrow({ id: "mini-player-audio-element" }),
+            container: getElementOrThrow({ id: "mini-player" }),
+            image: getElementOrThrow({ id: "mini-player-image" }),
+            title: getElementOrThrow({ id: "mini-player-title" }),
+        };
     }
 
     display(entry: POI) {
-        // TODO: maybe keep track of these on the constructor?
-        const element = getElementOrThrow({ id: "mini-player" });
-        const titleElement = getElementOrThrow({ id: "mini-player-title" });
+        this.elements.title.textContent = entry.title;
 
-        titleElement.textContent = entry.title;
-
-        const imageElement = getElementOrThrow({
-            id: "mini-player-image",
-        }) as HTMLImageElement;
-
-        // TODO: remove
         if (entry.imageName) {
-            imageElement.hidden = false;
-            imageElement.src = `${import.meta.env.BASE_URL}images/${entry.imageName}`;
-            imageElement.alt = entry.title;
+            this.elements.image.src = `${import.meta.env.BASE_URL}images/${entry.imageName}`;
+            this.elements.image.alt = entry.title;
+            this.elements.image.hidden = false;
         } else {
-            imageElement.hidden = true;
+            this.elements.image.hidden = true;
         }
 
         // TODO: remove
         if (entry.audioName) {
-            this.audioElement.pause();
-            this.audioElement.currentTime = 0; // TODO: save current time in local storage for each track?
+            this.elements.audio.hidden = false;
+            this.elements.audio.pause();
+            this.elements.audio.currentTime = 0; // TODO: save current time in local storage for each track?
 
-            this.audioElement.src = `${import.meta.env.BASE_URL}audio/${entry.audioName}`;
-            this.audioElement.load();
+            this.elements.audio.src = `${import.meta.env.BASE_URL}audio/${entry.audioName}`;
+            this.elements.audio.load();
+        } else {
+            this.elements.audio.hidden = true;
         }
 
-        element.classList.remove("hidden");
+        this.elements.container.classList.remove("hidden");
         this.hidden = false;
     }
 
     close() {
         // TODO: hidden check here?
-
-        getElementOrThrow({ id: "mini-player" }).classList.add("hidden");
+        this.elements.container.classList.add("hidden");
         this.hidden = true;
-        this.audioElement.pause();
-        this.audioElement.currentTime = 0;
+        this.elements.audio.pause();
+        this.elements.audio.currentTime = 0;
 
         /**
          * TODO: this dependency chain seems weird.
@@ -70,7 +66,13 @@ export class MiniPlayer {
     }
 
     public hidden: boolean = true;
-    private audioElement: HTMLAudioElement;
+
+    private elements: {
+        audio: HTMLAudioElement;
+        container: HTMLElement;
+        image: HTMLImageElement;
+        title: HTMLElement;
+    };
 }
 
 export const miniPlayerInstance = new MiniPlayer();

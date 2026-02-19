@@ -14,6 +14,7 @@ export const POIs: Array<POI> = [
     {
         title: "Quonset",
         id: "quonset",
+        imageName: "qounset.jpg",
         location: {
             lattitude: 34.181792,
             longitude: -116.414532,
@@ -39,6 +40,7 @@ export const POIs: Array<POI> = [
     {
         title: "Airstream Trailer",
         id: "airstream",
+        imageName: "airstream.jpg",
         audioName: "airstream.m4a",
         location: {
             lattitude: 34.181665,
@@ -47,6 +49,7 @@ export const POIs: Array<POI> = [
     },
     {
         title: "Sleeping Library",
+        imageName: "sleeping-library.jpg",
         id: "library",
         location: {
             lattitude: 34.18181,
@@ -64,6 +67,7 @@ export const POIs: Array<POI> = [
     {
         title: "Lazy Eye Gallery",
         id: "gallery",
+        imageName: "gallery.jpg",
         location: {
             lattitude: 34.181959,
             longitude: -116.414309,
@@ -72,6 +76,7 @@ export const POIs: Array<POI> = [
     {
         title: "Heidi & Derek's Studio",
         id: "heidi-derek-studio",
+        imageName: "studios.jpg",
         location: {
             lattitude: 34.181909,
             longitude: -116.414384,
