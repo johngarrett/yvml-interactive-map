@@ -1,7 +1,6 @@
-// TODO: file name
-
 import type { POI } from "../types";
 
+// TODO: lint and sort based on keys
 export const POIs: Array<POI> = [
     {
         title: "Parking Lot",
@@ -15,6 +14,7 @@ export const POIs: Array<POI> = [
         title: "Quonset",
         id: "quonset",
         imageName: "qounset.jpg",
+        audioName: "qounset.m4a",
         location: {
             lattitude: 34.181792,
             longitude: -116.414532,
@@ -24,6 +24,7 @@ export const POIs: Array<POI> = [
         title: "Foundary",
         id: "foundary",
         imageName: "foundry.jpg",
+        audioName: "foundry.m4a",
         location: {
             lattitude: 34.181725,
             longitude: -116.414696,
@@ -32,6 +33,7 @@ export const POIs: Array<POI> = [
     {
         title: "Outdoor Shower & Concrete Cubes",
         id: "outdoor-shower",
+        audioName: "shower-cubes.m4a",
         location: {
             lattitude: 34.181759,
             longitude: -116.414433,
@@ -75,6 +77,7 @@ export const POIs: Array<POI> = [
     },
     {
         title: "Heidi & Derek's Studio",
+        audioName: "studio.m4a",
         id: "heidi-derek-studio",
         imageName: "studios.jpg",
         location: {
@@ -101,6 +104,7 @@ export const POIs: Array<POI> = [
     {
         title: "Chicken Wire Dinosaur",
         id: "chicken-wire-dinosaur",
+        audioName: "dinosaur.m4a",
         location: {
             lattitude: 34.182057,
             longitude: -116.413928,
