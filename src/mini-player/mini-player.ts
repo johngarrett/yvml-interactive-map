@@ -24,22 +24,19 @@ export class MiniPlayer {
         if (entry.imageName) {
             this.elements.image.src = `${import.meta.env.BASE_URL}images/${entry.imageName}`;
             this.elements.image.alt = entry.title;
-            this.elements.image.hidden = false;
-        } else {
-            this.elements.image.hidden = true;
         }
 
-        // TODO: remove
+        this.elements.image.hidden = !entry.imageName;
+
         if (entry.audioName) {
-            this.elements.audio.hidden = false;
             this.elements.audio.pause();
             this.elements.audio.currentTime = 0; // TODO: save current time in local storage for each track?
 
             this.elements.audio.src = `${import.meta.env.BASE_URL}audio/${entry.audioName}`;
             this.elements.audio.load();
-        } else {
-            this.elements.audio.hidden = true;
         }
+
+        this.elements.audio.hidden = !entry.audioName;
 
         this.elements.container.classList.remove("hidden");
         this.hidden = false;
