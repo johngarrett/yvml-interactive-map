@@ -22,6 +22,7 @@ export const POIs: Array<POI> = [
     {
         title: "Foundary",
         id: "foundary",
+        imageName: "foundry.jpg",
         location: {
             lattitude: 34.181725,
             longitude: -116.414696,
@@ -38,6 +39,7 @@ export const POIs: Array<POI> = [
     {
         title: "Airstream Trailer",
         id: "airstream",
+        audioName: "airstream.m4a",
         location: {
             lattitude: 34.181665,
             longitude: -116.414396,

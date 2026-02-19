@@ -10,12 +10,40 @@ export class MiniPlayer {
                 this.close();
             },
         );
+        this.audioElement = getElementOrThrow({
+            id: "mini-player-audio-element",
+        });
     }
+
     display(entry: POI) {
+        // TODO: maybe keep track of these on the constructor?
         const element = getElementOrThrow({ id: "mini-player" });
         const titleElement = getElementOrThrow({ id: "mini-player-title" });
 
         titleElement.textContent = entry.title;
+
+        const imageElement = getElementOrThrow({
+            id: "mini-player-image",
+        }) as HTMLImageElement;
+
+        // TODO: remove
+        if (entry.imageName) {
+            imageElement.hidden = false;
+            imageElement.src = `${import.meta.env.BASE_URL}images/${entry.imageName}`;
+            imageElement.alt = entry.title;
+        } else {
+            imageElement.hidden = true;
+        }
+
+        // TODO: remove
+        if (entry.audioName) {
+            this.audioElement.pause();
+            this.audioElement.currentTime = 0; // TODO: save current time in local storage for each track?
+
+            this.audioElement.src = `${import.meta.env.BASE_URL}audio/${entry.audioName}`;
+            this.audioElement.load();
+        }
+
         element.classList.remove("hidden");
         this.hidden = false;
     }
@@ -25,6 +53,8 @@ export class MiniPlayer {
 
         getElementOrThrow({ id: "mini-player" }).classList.add("hidden");
         this.hidden = true;
+        this.audioElement.pause();
+        this.audioElement.currentTime = 0;
 
         /**
          * TODO: this dependency chain seems weird.
@@ -40,6 +70,7 @@ export class MiniPlayer {
     }
 
     public hidden: boolean = true;
+    private audioElement: HTMLAudioElement;
 }
 
 export const miniPlayerInstance = new MiniPlayer();
