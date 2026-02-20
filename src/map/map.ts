@@ -2,6 +2,7 @@ import type { POI } from "../types";
 import L, { TileLayer, type MapOptions } from "leaflet";
 import { poiMarker } from "./components/poi-marker";
 import { poiTrackerInstance } from "../points";
+import { debug } from "../utils";
 
 type MapConfiguartion = {
     POIs: Array<POI>;
@@ -51,13 +52,37 @@ export const initMap = (config: MapConfiguartion) => {
         /* watch: true */
     });
 
+    // Safari (macOS/iOS) can change viewport when the location permission dialog
+    // appears or closes, so Leaflet’s cached size becomes wrong. Recompute it.
+    const recomputeMapSize = () => {
+        debug("[map] recomputeMapSize called");
+        map.invalidateSize();
+    };
+
     map.on("locationerror", (e) => {
         console.error(e);
+        recomputeMapSize();
     });
     map.on("locationfound", (e) => {
         // TODO: remove previous circle, get orientation
         const radius = e.accuracy;
 
         L.circle(e.latlng, { radius }).addTo(map);
+        recomputeMapSize();
     });
+
+    // Fallback: fix size on first user interaction (e.g. first tap/click) in case
+    // the permission dialog didn’t fire or viewport settled later (Safari).
+    const onFirstInteraction = () => {
+        recomputeMapSize();
+        map.off("click", onFirstInteraction);
+    };
+    map.on("click", onFirstInteraction);
+
+    // Safari often resizes viewport after the permission dialog; recalc after a delay.
+    const delayedFix = () => {
+        recomputeMapSize();
+    };
+    setTimeout(delayedFix, 400);
+    setTimeout(delayedFix, 1200);
 };
