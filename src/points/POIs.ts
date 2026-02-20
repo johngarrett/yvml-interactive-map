@@ -1,7 +1,6 @@
-// TODO: file name
-
 import type { POI } from "../types";
 
+// TODO: lint and sort based on keys
 export const POIs: Array<POI> = [
     {
         title: "Parking Lot",
@@ -14,6 +13,8 @@ export const POIs: Array<POI> = [
     {
         title: "Quonset",
         id: "quonset",
+        imageName: "qounset.jpg",
+        audioName: "qounset.m4a",
         location: {
             lattitude: 34.181792,
             longitude: -116.414532,
@@ -22,6 +23,8 @@ export const POIs: Array<POI> = [
     {
         title: "Foundary",
         id: "foundary",
+        imageName: "foundry.jpg",
+        audioName: "foundry.m4a",
         location: {
             lattitude: 34.181725,
             longitude: -116.414696,
@@ -30,6 +33,7 @@ export const POIs: Array<POI> = [
     {
         title: "Outdoor Shower & Concrete Cubes",
         id: "outdoor-shower",
+        audioName: "shower-cubes.m4a",
         location: {
             lattitude: 34.181759,
             longitude: -116.414433,
@@ -38,6 +42,8 @@ export const POIs: Array<POI> = [
     {
         title: "Airstream Trailer",
         id: "airstream",
+        imageName: "airstream.jpg",
+        audioName: "airstream.m4a",
         location: {
             lattitude: 34.181665,
             longitude: -116.414396,
@@ -45,6 +51,7 @@ export const POIs: Array<POI> = [
     },
     {
         title: "Sleeping Library",
+        imageName: "sleeping-library.jpg",
         id: "library",
         location: {
             lattitude: 34.18181,
@@ -62,6 +69,7 @@ export const POIs: Array<POI> = [
     {
         title: "Lazy Eye Gallery",
         id: "gallery",
+        imageName: "gallery.jpg",
         location: {
             lattitude: 34.181959,
             longitude: -116.414309,
@@ -69,7 +77,9 @@ export const POIs: Array<POI> = [
     },
     {
         title: "Heidi & Derek's Studio",
+        audioName: "studio.m4a",
         id: "heidi-derek-studio",
+        imageName: "studios.jpg",
         location: {
             lattitude: 34.181909,
             longitude: -116.414384,
@@ -94,6 +104,7 @@ export const POIs: Array<POI> = [
     {
         title: "Chicken Wire Dinosaur",
         id: "chicken-wire-dinosaur",
+        audioName: "dinosaur.m4a",
         location: {
             lattitude: 34.182057,
             longitude: -116.413928,

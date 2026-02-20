@@ -5,6 +5,7 @@ import { POIs } from "./points";
 import "./styles.css";
 
 import "leaflet-rotate";
+import "leaflet.offline"; // temp
 
 initMap({
     POIs,

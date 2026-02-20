@@ -21,22 +21,23 @@
 <body>
   <div id="map"></div>
 
+  <!---- START Mini Player -->
   <div id="mini-player" class="hidden">
-    <div class="flex flex-col p-2">
+    <div class="flex flex-col p-4">
       <!-- horzintal div above -->
       <div class="flex place-content-between">
-        <div id="mini-player-title" class="m-1 font-bold"></div>
+        <img id="mini-player-image" />
+        <div id="mini-player-title"></div>
         <button id="mini-player-close"
           class="font-bold hover:bg-gray-100 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500">
           x
         </button>
       </div>
-      <div id="mini-player-audio">
-        audio player goes here
-      </div>
+      <audio id="mini-player-audio-element" controls preload="none"></audio>
       <p class="mt-2">we could have some text here that writes out what the audio description says.</p>
     </div>
   </div>
+  <!---- END Mini Player -->
 
   <!-- Vite will inject compiled JS here -->
   <script type="module" src="/src/main.ts"></script>

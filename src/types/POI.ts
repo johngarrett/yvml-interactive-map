@@ -5,4 +5,8 @@ export type POI = {
         lattitude: number;
         longitude: number;
     };
+    // TODO: non-optional
+    imageName?: string;
+    // TODO: non-optional
+    audioName?: string;
 };

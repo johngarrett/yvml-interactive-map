@@ -21,6 +21,7 @@ html,
 body {
   margin: 0;
   height: 100%;
+  font-family: Futura, Helvetica, Arial, sans-serif;
 }
 
 #map {
@@ -44,7 +45,18 @@ body {
   z-index: 1000;
 
   background: white;
-  border-radius: 12px;
+}
+
+#mini-player-title {
+  font-weight: bold;
+  background-color: black;
+  color: white;
+  font-size: xx-large;
+  margin: 1;
+}
+
+#mini-player-image {
+  width: 60%;
 }
 
 #mini-player-close {
