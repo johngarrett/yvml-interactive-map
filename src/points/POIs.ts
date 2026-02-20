@@ -13,8 +13,8 @@ export const POIs: Array<POI> = [
     {
         title: "Quonset",
         id: "quonset",
-        imageName: "qounset.jpg",
-        audioName: "qounset.m4a",
+        imageName: "quonset.jpg",
+        audioName: "quonset.m4a",
         location: {
             lattitude: 34.181792,
             longitude: -116.414532,
