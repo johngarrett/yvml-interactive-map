@@ -30,18 +30,26 @@ const setupAudioElement = ({
     element.pause();
 
     const timestampKey = getTimestampKey(entry);
+    const savedTime = LocalStorageProvider.has(timestampKey)
+        ? Number(JSON.parse(LocalStorageProvider.getOrThrow(timestampKey)))
+        : 0;
 
-    if (LocalStorageProvider.has(timestampKey)) {
-        element.currentTime = Number(
-            JSON.parse(LocalStorageProvider.getOrThrow(timestampKey)),
-        );
-    } else {
-        debug("AudioElement: no timestampKey found, setting currentTime to 1");
-        element.currentTime = 0;
+    if (!LocalStorageProvider.has(timestampKey)) {
+        debug("AudioElement: no timestampKey found, will start at 0");
     }
 
     element.src = `${import.meta.env.BASE_URL}audio/${entry.audioName}`;
     element.load();
+
+    /*
+     * Safari (and WebKit) ignores currentTime set before src/load(); set it
+     * after metadata is loaded so resume works correctly.
+     */
+    const applyResumePosition = () => {
+        element.currentTime = savedTime;
+        element.removeEventListener("loadedmetadata", applyResumePosition);
+    };
+    element.addEventListener("loadedmetadata", applyResumePosition);
 
     /*
      * save audio timestamp whenever the audio is paused
