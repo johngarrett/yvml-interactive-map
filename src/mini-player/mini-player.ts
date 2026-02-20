@@ -23,11 +23,9 @@ const getTimestampKey = (entry: POI) => {
 const setupAudioElement = ({
     entry,
     element,
-    controller,
 }: {
     entry: POI;
     element: HTMLAudioElement;
-    controller: AbortController;
 }) => {
     element.pause();
 
@@ -38,7 +36,7 @@ const setupAudioElement = ({
             JSON.parse(LocalStorageProvider.getOrThrow(timestampKey)),
         );
     } else {
-        debug("AudioElement: no timestampKey found, setting currentTime to 0");
+        debug("AudioElement: no timestampKey found, setting currentTime to 1");
         element.currentTime = 0;
     }
 
@@ -48,18 +46,17 @@ const setupAudioElement = ({
     /*
      * save audio timestamp whenever the audio is paused
      */
-    element.addEventListener(
-        "pause",
-        () => {
-            debug(`AudioElement: pause selected on ${entry.id}`);
-            LocalStorageProvider.set(
-                timestampKey,
-                JSON.stringify(element.currentTime),
-            );
-            debug("pause listener attached with controller:", controller);
-        },
-        { signal: controller.signal },
-    );
+    const listener = () => {
+        debug(`AudioElement: pause selected on ${entry.id}`);
+        LocalStorageProvider.set(
+            timestampKey,
+            JSON.stringify(element.currentTime),
+        );
+    };
+
+    element.addEventListener("pause", listener);
+
+    return listener;
 };
 
 /**
@@ -71,20 +68,27 @@ const setupAudioElement = ({
  */
 const teardownAudioElement = ({
     element,
-    controller,
+    listener,
+    entry,
 }: {
     element: HTMLAudioElement;
-    controller: AbortController;
+    listener: () => void;
+    entry: POI;
 }) => {
-    debug("AudioElement: teardown. controller: ", controller);
+    debug("AudioElement: teardown");
 
     if (!element.paused) {
         debug("AudioElement: audio wasn't paused, calling pause");
         element.pause();
     }
 
-    // removes the listener
-    controller.abort();
+    LocalStorageProvider.set(
+        getTimestampKey(entry),
+        JSON.stringify(element.currentTime),
+    );
+
+    // TODO: is there a way to remove ALL event listeners?
+    element.removeEventListener("pause", listener);
 };
 
 export class MiniPlayer {
@@ -107,14 +111,13 @@ export class MiniPlayer {
      * called whenever POITracker sees a switch
      */
     display(entry: POI) {
-        /**
-         * abort existing listeners
-         */
-        this.audioAbortController.abort();
-        /**
-         * create a new abort controller whenever we switched
-         */
-        this.audioAbortController = new AbortController();
+        if (this.active?.entry && entry.id !== this.active.entry?.id) {
+            info(
+                `[MiniPlayer] switching from ${this.active.entry?.id} to ${entry.id}`,
+            );
+        }
+
+        this.active = { entry };
 
         this.elements.title.textContent = entry.title;
 
@@ -126,10 +129,9 @@ export class MiniPlayer {
         this.elements.image.hidden = !entry.imageName;
 
         if (entry.audioName) {
-            setupAudioElement({
+            this.active.listener = setupAudioElement({
                 entry,
                 element: this.elements.audio,
-                controller: this.audioAbortController,
             });
         }
 
@@ -144,10 +146,15 @@ export class MiniPlayer {
         this.elements.container.classList.add("hidden");
         this.hidden = true;
 
-        teardownAudioElement({
-            element: this.elements.audio,
-            controller: this.audioAbortController,
-        });
+        if (this.active?.listener) {
+            teardownAudioElement({
+                element: this.elements.audio,
+                entry: this.active.entry,
+                listener: this.active.listener,
+            });
+        } else {
+            debug("no active listener, not tearing down audio");
+        }
 
         /**
          * TODO: this dependency chain seems weird.
@@ -171,7 +178,10 @@ export class MiniPlayer {
         title: HTMLElement;
     };
 
-    private audioAbortController = new AbortController();
+    private active?: {
+        entry: POI;
+        listener?: () => void;
+    };
 }
 
 export const miniPlayerInstance = new MiniPlayer();
