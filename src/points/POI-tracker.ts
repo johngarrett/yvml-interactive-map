@@ -5,13 +5,13 @@ import { debug, getElementOrThrow } from "../utils";
 
 export class POITracker {
     select(poi: POI) {
-        if (poi.id !== this.activePOI?.id) {
-            this.deselectActive();
-            this.activePOI = poi;
-        } else {
-            debug("POI already active");
+        if (poi.id === this.activePOI?.id) {
+            debug("[POITracker] POI already active, returning early");
             return;
         }
+
+        this.deselectActive();
+        this.activePOI = poi;
 
         this.viewed.add(poi);
 
