@@ -1,7 +1,7 @@
 import { poiTrackerInstance } from "../points";
 import { LocalStorageProvider } from "../storage";
 import type { POI } from "../types";
-import { getElementOrThrow } from "../utils";
+import { getElementOrThrow, info } from "../utils";
 
 const getPlaybackKey = (entry: POI) => {
     return `${entry.id}-timestamp`;
@@ -22,6 +22,13 @@ export class MiniPlayer {
         };
     }
 
+    /**
+     * TODO: we need to have tear down stuff when we switch between two entries
+     *
+     *
+     * 1. unregister event handlers
+     * 2. save audio duration
+     */
     display(entry: POI) {
         this.activeEntry = entry;
 
@@ -49,6 +56,9 @@ export class MiniPlayer {
 
             this.elements.audio.src = `${import.meta.env.BASE_URL}audio/${entry.audioName}`;
             this.elements.audio.load();
+            this.elements.audio.addEventListener("pause", () => {
+                info("pause selected on", entry.id);
+            });
         }
 
         this.elements.audio.hidden = !entry.audioName;
