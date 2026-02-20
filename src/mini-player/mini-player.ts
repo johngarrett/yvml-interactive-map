@@ -1,11 +1,96 @@
 import { poiTrackerInstance } from "../points";
 import { LocalStorageProvider } from "../storage";
 import type { POI } from "../types";
-import { getElementOrThrow, info } from "../utils";
+import { debug, getElementOrThrow, info } from "../utils";
 
-const getPlaybackKey = (entry: POI) => {
+type AudioElementWithController = HTMLAudioElement & {
+    controller: AbortController;
+};
+
+// TODO: new file for these
+
+const getTimestampKey = (entry: POI) => {
     return `${entry.id}-timestamp`;
 };
+
+/**
+ * setup HTMLAudioElement
+ *
+ * 1. pull timestamp from local storage
+ * 2. load media
+ * 3. add event listener
+ */
+const setupAudioElement = ({
+    entry,
+    element,
+}: {
+    entry: POI;
+    element: HTMLAudioElement;
+}) => {
+    element.pause();
+
+    const timestampKey = getTimestampKey(entry);
+
+    if (LocalStorageProvider.has(timestampKey)) {
+        element.currentTime = Number(
+            JSON.parse(LocalStorageProvider.getOrThrow(timestampKey)),
+        );
+    } else {
+        debug("AudioElement: no timestampKey found, setting currentTime to 1");
+        element.currentTime = 0;
+    }
+
+    element.src = `${import.meta.env.BASE_URL}audio/${entry.audioName}`;
+    element.load();
+
+    /*
+     * save audio timestamp whenever the audio is paused
+     */
+    const listener = () => {
+        debug(`AudioElement: pause selected on ${entry.id}`);
+        LocalStorageProvider.set(
+            timestampKey,
+            JSON.stringify(element.currentTime),
+        );
+    };
+
+    element.addEventListener("pause", listener);
+
+    return listener;
+};
+
+/**
+ * teardown HTMLAudioElement
+ *
+ * 1. save timestamp to local storage
+ * 2. pause media
+ * 3. remove event listener
+ */
+const teardownAudioElement = ({
+    element,
+    listener,
+    entry,
+}: {
+    element: HTMLAudioElement;
+    listener: () => void;
+    entry: POI;
+}) => {
+    debug("AudioElement: teardown");
+
+    if (!element.paused) {
+        debug("AudioElement: audio wasn't paused, calling pause");
+        element.pause();
+    }
+
+    LocalStorageProvider.set(
+        getTimestampKey(entry),
+        JSON.stringify(element.currentTime),
+    );
+
+    // TODO: is there a way to remove ALL event listeners?
+    element.removeEventListener("pause", listener);
+};
+
 export class MiniPlayer {
     constructor() {
         getElementOrThrow({ id: "mini-player-close" }).addEventListener(
@@ -23,20 +108,16 @@ export class MiniPlayer {
     }
 
     /**
-     * TODO: we need to have tear down stuff when we switch between two entries
-     *
-     *
-     * 1. unregister event handlers
-     * 2. save audio duration
+     * called whenever POITracker sees a switch
      */
     display(entry: POI) {
-        if (this.activeEntry && entry.id !== this.activeEntry?.id) {
+        if (this.active?.entry && entry.id !== this.active.entry?.id) {
             info(
-                `[MiniPlayer] switching from ${this.activeEntry?.id} to ${entry.id}`,
+                `[MiniPlayer] switching from ${this.active.entry?.id} to ${entry.id}`,
             );
         }
 
-        this.activeEntry = entry;
+        this.active = { entry };
 
         this.elements.title.textContent = entry.title;
 
@@ -48,22 +129,9 @@ export class MiniPlayer {
         this.elements.image.hidden = !entry.imageName;
 
         if (entry.audioName) {
-            this.elements.audio.pause();
-
-            const playbackKey = getPlaybackKey(entry);
-
-            if (LocalStorageProvider.has(playbackKey)) {
-                this.elements.audio.currentTime = JSON.parse(
-                    LocalStorageProvider.getOrThrow(playbackKey),
-                ) as number;
-            } else {
-                this.elements.audio.currentTime = 0;
-            }
-
-            this.elements.audio.src = `${import.meta.env.BASE_URL}audio/${entry.audioName}`;
-            this.elements.audio.load();
-            this.elements.audio.addEventListener("pause", () => {
-                info("pause selected on", entry.id);
+            this.active.listener = setupAudioElement({
+                entry,
+                element: this.elements.audio,
             });
         }
 
@@ -77,19 +145,16 @@ export class MiniPlayer {
         // TODO: hidden check here?
         this.elements.container.classList.add("hidden");
         this.hidden = true;
-        this.elements.audio.pause();
 
-        if (this.activeEntry) {
-            const playbackKey = getPlaybackKey(this.activeEntry);
-            LocalStorageProvider.set(
-                playbackKey,
-                JSON.stringify(this.elements.audio.currentTime),
-            );
+        if (this.active?.listener) {
+            teardownAudioElement({
+                element: this.elements.audio,
+                entry: this.active.entry,
+                listener: this.active.listener,
+            });
         } else {
-            console.error("no active on close");
+            debug("no active listener, not tearing down audio");
         }
-
-        this.elements.audio.currentTime = 0;
 
         /**
          * TODO: this dependency chain seems weird.
@@ -106,14 +171,16 @@ export class MiniPlayer {
 
     public hidden: boolean = true;
 
-    // TODO: bad coupling...
-    private activeEntry?: POI = undefined;
-
     private elements: {
-        audio: HTMLAudioElement;
+        audio: AudioElementWithController;
         container: HTMLElement;
         image: HTMLImageElement;
         title: HTMLElement;
+    };
+
+    private active?: {
+        entry: POI;
+        listener?: () => void;
     };
 }
 
