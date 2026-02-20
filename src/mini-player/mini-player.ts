@@ -46,6 +46,7 @@ const setupAudioElement = ({
     /*
      * save audio timestamp whenever the audio is paused
      */
+    // TODO: maybe break this out into a 'save' function and that will maintian the lifecycle
     const listener = () => {
         debug(`AudioElement: pause selected on ${entry.id}`);
         LocalStorageProvider.set(
