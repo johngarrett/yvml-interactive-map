@@ -49,9 +49,7 @@ body {
 
 #mini-player-title {
   font-weight: bold;
-  background-color: black;
-  color: white;
-  font-size: xx-large;
+  font-size: medium;
   margin: 1;
 }
 
@@ -74,4 +72,8 @@ body {
   padding-top: 10px;
   padding-bottom: 10px;
   border-width: 2px;
+}
+
+#mini-player-audio-element {
+  width: 100%;
 }
