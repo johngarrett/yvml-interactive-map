@@ -1,14 +1,15 @@
 import { markerIdForPOI } from "../map/components/poi-marker";
 import { miniPlayerInstance } from "../mini-player";
 import type { POI } from "../types";
-import { getElementOrThrow } from "../utils";
+import { debug, getElementOrThrow } from "../utils";
 
 export class POITracker {
     select(poi: POI) {
         if (poi.id !== this.activePOI?.id) {
+            this.deselectActive();
             this.activePOI = poi;
         } else {
-            console.log("POI already active");
+            debug("POI already active");
             return;
         }
 
@@ -22,6 +23,7 @@ export class POITracker {
     }
 
     deselectActive() {
+        debug("[POITracker] deselectActive");
         this.activePOI = undefined;
         if (!miniPlayerInstance.hidden) {
             miniPlayerInstance.close();

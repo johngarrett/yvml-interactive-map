@@ -30,6 +30,12 @@ export class MiniPlayer {
      * 2. save audio duration
      */
     display(entry: POI) {
+        if (this.activeEntry && entry.id !== this.activeEntry?.id) {
+            info(
+                `[MiniPlayer] switching from ${this.activeEntry?.id} to ${entry.id}`,
+            );
+        }
+
         this.activeEntry = entry;
 
         this.elements.title.textContent = entry.title;
