@@ -57,6 +57,18 @@ export class LocationTracker {
         }
     };
 
+    /**
+     * manually redraw the location cirlce on zoom.
+     *
+     * On iOS, without this, zooming makes the dot stay in the same position until zoom is finished
+     */
+    public zoomAnimaitonCallback = (): void => {
+        if (this.locationMarker) {
+            this.locationMarker.setRadius(this.locationMarker.getRadius());
+            this.locationMarker.setLatLng(this.locationMarker.getLatLng());
+        }
+    };
+
     private handlePosition = (position: GeolocationPosition) => {
         const { latitude, longitude, accuracy } = position.coords;
 
@@ -64,8 +76,8 @@ export class LocationTracker {
 
         if (!this.locationMarker) {
             debug("adding locationMarker", position.coords);
-            this.locationMarker = L.circle([0, 0], {
-                radius: 0, // meters
+            this.locationMarker = L.circle([latitude, longitude], {
+                radius: accuracy, // meters
                 color: "#1e90ff",
                 weight: 1,
                 fillColor: "#1e90ff",
