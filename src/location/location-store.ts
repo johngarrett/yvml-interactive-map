@@ -8,8 +8,8 @@ type LocationPoint = {
 };
 
 class LocationStore {
-    add(point: LocationPoint) {
-        // TODO: filtering around what to save
+    maybeAdd(point: LocationPoint) {
+        // TODO: filtering around what to save based on distance
         this.data.push(point);
         debug(
             `[LocationStore]: ${point} added; total size: ${this.data.length}`,
