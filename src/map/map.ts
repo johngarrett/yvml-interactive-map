@@ -3,7 +3,7 @@ import L, { TileLayer, type MapOptions } from "leaflet";
 import { poiMarker } from "./components/poi-marker";
 import { poiTrackerInstance } from "../points";
 import { debug } from "../utils";
-import { PositionTracker } from "../location/position-tracker";
+import { LocationTracker } from "../location";
 
 type MapConfiguartion = {
     POIs: Array<POI>;
@@ -47,9 +47,10 @@ export const initMap = (config: MapConfiguartion) => {
             });
     });
 
-    const positionTracker = new PositionTracker();
+    // TODO: move into main.ts
+    const locationTracker = new LocationTracker();
 
-    map.addLayer(positionTracker.layer);
+    map.addLayer(locationTracker.layer);
 
     // Safari (macOS/iOS) can change viewport when the location permission dialog
     // appears or closes, so Leaflet’s cached size becomes wrong. Recompute it.

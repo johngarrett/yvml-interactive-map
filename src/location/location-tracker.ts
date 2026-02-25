@@ -2,7 +2,7 @@ import L from "leaflet";
 import { debug, info } from "../utils";
 import { locationStoreInstance } from "./location-store";
 
-export class PositionTracker {
+export class LocationTracker {
     /**
      * Initalize position tracker and EventListener
      */

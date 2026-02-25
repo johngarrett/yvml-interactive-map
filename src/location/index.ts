@@ -1,2 +1,2 @@
 export * from "./location-store";
-//export * from "./position-marker";
+export * from "./location-tracker";
