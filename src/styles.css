@@ -41,7 +41,7 @@ body {
 
   width: 100%;
   box-sizing: border-box;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1.5px solid #000;
   background-color: #ffffff;
   /**
    * TODO: no hard coding

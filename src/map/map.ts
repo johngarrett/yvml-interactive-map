@@ -20,6 +20,7 @@ export const initMap = (config: MapConfiguartion) => {
             rotate: true,
             bearing: 180, // start upside down
             touchRotate: true,
+            zoomControl: false,
             rotateControl: undefined,
             zoomAnimation: true,
             markerZoomAnimation: true,
