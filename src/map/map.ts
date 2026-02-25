@@ -22,7 +22,7 @@ export const initMap = (config: MapConfiguartion) => {
             touchRotate: true,
             rotateControl: undefined,
             zoomAnimation: true,
-            markerZoomAnimation: false,
+            markerZoomAnimation: true,
             preferCanvas: true,
         } as unknown as MapOptions /* these come from the extension */,
     )
