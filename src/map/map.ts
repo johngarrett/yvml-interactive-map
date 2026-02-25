@@ -89,10 +89,23 @@ export const initMap = (config: MapConfiguartion) => {
         }
     });
 
+    let pathLine: L.Polyline | undefined = undefined;
     let marker: L.CircleMarker | undefined = undefined;
 
     function handlePosition(position: GeolocationPosition) {
         const { latitude, longitude, accuracy } = position.coords;
+
+        if (!pathLine) {
+            pathLine = L.polyline([], {
+                color: "blue",
+                weight: 4,
+                smoothFactor: 1.5,
+            }).addTo(map);
+            // TODO: read from local storage
+            pathLine.setLatLngs([[latitude, longitude]]);
+        } else {
+            pathLine?.addLatLng([latitude, longitude]);
+        }
 
         if (!marker) {
             marker = L.circle([latitude, longitude], {
