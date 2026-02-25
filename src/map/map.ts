@@ -54,6 +54,8 @@ export const initMap = (config: MapConfiguartion) => {
     const locationTracker = new LocationTracker();
 
     map.addLayer(locationTracker.layer);
+    // Force a redraw of the accuracy circle during map movements (especially iOS pinch-zoom).
+    map.on("move", locationTracker.zoomAnimaitonCallback);
 
     // Safari (macOS/iOS) can change viewport when the location permission dialog
     // appears or closes, so Leaflet’s cached size becomes wrong. Recompute it.

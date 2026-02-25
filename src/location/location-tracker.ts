@@ -58,14 +58,14 @@ export class LocationTracker {
     };
 
     /**
-     * manually redraw the location cirlce on zoom.
+     * Manually redraw the location circle during map movements.
      *
-     * On iOS, without this, zooming makes the dot stay in the same position until zoom is finished
+     * Intended to work around iOS pinch-zoom quirks by forcing a vector
+     * redraw instead of changing radius/latlng.
      */
     public zoomAnimaitonCallback = (): void => {
         if (this.locationMarker) {
-            this.locationMarker.setRadius(this.locationMarker.getRadius());
-            this.locationMarker.setLatLng(this.locationMarker.getLatLng());
+            this.locationMarker.redraw();
         }
     };
 
