@@ -5,3 +5,7 @@ export const debug = (...messages: unknown[]) => {
 export const info = (...messages: unknown[]) => {
     console.info(...messages);
 };
+
+export const warn = (...messages: unknown[]) => {
+    console.warn(...messages);
+};
