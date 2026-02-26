@@ -46,9 +46,6 @@ class LocationStore {
 
     saveToStorage = () => {
         if (this.data.length === this.previousDataLength) {
-            debug(
-                `[LocationStore] saveToStorage: length unchanged, not saving`,
-            );
             return;
         }
 
