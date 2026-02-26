@@ -14,7 +14,15 @@ export const AudioElement = {
      * 2. load media
      * 3. add event listener
      */
-    setup: ({ entry, element }: { entry: POI; element: HTMLAudioElement }) => {
+    setup: ({
+        entry,
+        element,
+        pauseCallback,
+    }: {
+        entry: POI;
+        element: HTMLAudioElement;
+        pauseCallback: () => void;
+    }) => {
         element.pause();
 
         const timestampKey = getTimestampKey(entry);
@@ -49,6 +57,7 @@ export const AudioElement = {
                 timestampKey,
                 JSON.stringify(element.currentTime),
             );
+            pauseCallback();
         };
 
         element.addEventListener("pause", pauseEventListener);

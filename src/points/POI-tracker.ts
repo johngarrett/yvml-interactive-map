@@ -1,7 +1,6 @@
-import { markerIdForPOI } from "../map/components/poi-marker";
 import { Observable } from "../observable";
 import type { POI } from "../types";
-import { debug, getElementOrThrow } from "../utils";
+import { debug } from "../utils";
 
 export class POITracker extends Observable<POI | undefined> {
     select(poi: POI) {
@@ -14,14 +13,8 @@ export class POITracker extends Observable<POI | undefined> {
         this.activePOI = poi;
 
         this.viewed.add(poi);
+
         this.notify(poi);
-
-        // TODO
-        const poiMarker = getElementOrThrow({ id: markerIdForPOI(poi) });
-
-        //miniPlayerInstance.display(poi);
-
-        poiMarker.style.opacity = "0.7";
     }
 
     deselectActive() {
@@ -32,9 +25,6 @@ export class POITracker extends Observable<POI | undefined> {
         }
 
         this.activePOI = undefined;
-        //if (!miniPlayerInstance.hidden) {
-        //    miniPlayerInstance.close();
-        //}
     }
 
     private activePOI: POI | undefined = undefined;
