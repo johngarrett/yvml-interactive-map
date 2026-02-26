@@ -3,10 +3,6 @@ import type { POI } from "../types";
 import { debug, getElementOrThrow, info } from "../utils";
 import { AudioElement } from "./audio-element";
 
-type AudioElementWithController = HTMLAudioElement & {
-    controller: AbortController;
-};
-
 export class MiniPlayer {
     constructor(params: { poiTracker: POITracker }) {
         getElementOrThrow({ id: "mini-player-close" }).addEventListener(
@@ -98,7 +94,7 @@ export class MiniPlayer {
     public hidden: boolean = true;
 
     private elements: {
-        audio: AudioElementWithController;
+        audio: HTMLAudioElement;
         container: HTMLElement;
         image: HTMLImageElement;
         title: HTMLElement;
