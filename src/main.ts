@@ -1,6 +1,6 @@
 import { mapLayers } from "./map/layers";
 import { initMap } from "./map/map";
-import { POIs } from "./points";
+import { POIs, poiTrackerInstance } from "./points";
 
 import "./styles.css";
 
@@ -9,6 +9,7 @@ import "leaflet.offline"; // temp
 import { SettingsMenu } from "./settings";
 import { locationStoreInstance } from "./location";
 import { ConsoleTracker } from "./console";
+import { MiniPlayer } from "./mini-player";
 
 const consoleTracker = new ConsoleTracker();
 consoleTracker.subscribe();
@@ -22,6 +23,9 @@ initMap({
     defaultLayer: mapLayers.satellite,
     layers: mapLayers,
 });
+
+// TODO: break poi tracker out
+new MiniPlayer({ poiTracker: poiTrackerInstance });
 
 setInterval(() => {
     locationStoreInstance.saveToStorage();

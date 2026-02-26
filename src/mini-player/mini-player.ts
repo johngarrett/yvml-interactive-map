@@ -1,4 +1,4 @@
-import { poiTrackerInstance } from "../points";
+import { POITracker, poiTrackerInstance } from "../points";
 import { LocalStorageProvider } from "../storage";
 import type { POI } from "../types";
 import { debug, getElementOrThrow, info } from "../utils";
@@ -55,7 +55,7 @@ const setupAudioElement = ({
      * save audio timestamp whenever the audio is paused
      */
     // TODO: maybe break this out into a 'save' function and that will maintian the lifecycle
-    const listener = () => {
+    const pauseEventListener = () => {
         debug(`AudioElement: pause selected on ${entry.id}`);
         LocalStorageProvider.set(
             timestampKey,
@@ -63,9 +63,9 @@ const setupAudioElement = ({
         );
     };
 
-    element.addEventListener("pause", listener);
+    element.addEventListener("pause", pauseEventListener);
 
-    return listener;
+    return pauseEventListener;
 };
 
 /**
@@ -101,19 +101,32 @@ const teardownAudioElement = ({
 };
 
 export class MiniPlayer {
-    constructor() {
+    constructor(params: { poiTracker: POITracker }) {
         getElementOrThrow({ id: "mini-player-close" }).addEventListener(
             "click",
             () => {
-                this.close();
+                //this.close();
+                params.poiTracker.deselectActive();
             },
         );
+
         this.elements = {
             audio: getElementOrThrow({ id: "mini-player-audio-element" }),
             container: getElementOrThrow({ id: "mini-player" }),
             image: getElementOrThrow({ id: "mini-player-image" }),
             title: getElementOrThrow({ id: "mini-player-title" }),
         };
+
+        params.poiTracker.addListener((activePOI) => {
+            debug(
+                `[MiniPlayer] listener for poiTrackerInstance fired: ${activePOI}`,
+            );
+            if (activePOI) {
+                this.display(activePOI);
+            } else {
+                this.close();
+            }
+        });
     }
 
     /**
@@ -124,6 +137,15 @@ export class MiniPlayer {
             info(
                 `[MiniPlayer] switching from ${this.active.entry?.id} to ${entry.id}`,
             );
+
+            if (this.active.pauseEventListener) {
+                debug("[MiniPlayer] tearing down old audio element");
+                teardownAudioElement({
+                    element: this.elements.audio,
+                    entry: this.active.entry,
+                    listener: this.active.pauseEventListener,
+                });
+            }
         }
 
         this.active = { entry };
@@ -138,7 +160,7 @@ export class MiniPlayer {
         this.elements.image.hidden = !entry.imageName;
 
         if (entry.audioName) {
-            this.active.listener = setupAudioElement({
+            this.active.pauseEventListener = setupAudioElement({
                 entry,
                 element: this.elements.audio,
             });
@@ -155,11 +177,11 @@ export class MiniPlayer {
         this.elements.container.classList.add("hidden");
         this.hidden = true;
 
-        if (this.active?.listener) {
+        if (this.active?.pauseEventListener) {
             teardownAudioElement({
                 element: this.elements.audio,
                 entry: this.active.entry,
-                listener: this.active.listener,
+                listener: this.active.pauseEventListener,
             });
         } else {
             debug("no active listener, not tearing down audio");
@@ -175,7 +197,7 @@ export class MiniPlayer {
          *
          * and now POITracker also calls this fn
          */
-        poiTrackerInstance.deselectActive();
+        //poiTrackerInstance.deselectActive();
     }
 
     public hidden: boolean = true;
@@ -189,8 +211,6 @@ export class MiniPlayer {
 
     private active?: {
         entry: POI;
-        listener?: () => void;
+        pauseEventListener?: () => void;
     };
 }
-
-export const miniPlayerInstance = new MiniPlayer();
