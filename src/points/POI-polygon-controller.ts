@@ -5,23 +5,46 @@ type POIPolygonControllerParams = {
     POIs: POI[];
 };
 
-type POIWithPolygon = POI & { polygon: NonNullable<POI["polygon"]> };
+const svgLabel = (title: string) =>
+    `
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 100 100"
+     preserveAspectRatio="none">
 
-const hasPolygon = (poi: POI): poi is POIWithPolygon =>
-    poi.polygon !== undefined;
+  <text x="50"
+        y="55"
+        text-anchor="middle"
+        dominant-baseline="middle"
+        font-size="40"
+        font-weight="bold">
+    ${title}
+  </text>
+</svg>
+`;
 
-const poiToPolygon = (poi: POIWithPolygon) =>
-    L.polygon(poi.polygon.path, poi.polygon.options).bindTooltip(poi.title, {
+const poiToLayers = (poi: POI) => {
+    const polygon = L.polygon(
+        poi.polygon.path,
+        poi.polygon.options,
+    ).bindTooltip(poi.title, {
         permanent: true,
         direction: "center",
         className: "polygon-label",
     });
 
+    const svg = svgLabel(poi.title);
+    const label = L.svgOverlay(svg, polygon.getBounds(), {
+        interactive: false,
+    });
+
+    return [polygon, label];
+};
+
 export class POIPolygonController {
     constructor({ POIs }: POIPolygonControllerParams) {
         // TODO: attach listener
 
-        this.layer = L.layerGroup(POIs.filter(hasPolygon).map(poiToPolygon));
+        this.layer = L.layerGroup(POIs.flatMap(poiToLayers));
     }
 
     public layer: L.LayerGroup;
