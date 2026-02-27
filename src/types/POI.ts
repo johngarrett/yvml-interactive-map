@@ -1,3 +1,5 @@
+import L from "leaflet";
+
 export type POI = {
     id: string;
     title: string;
@@ -5,8 +7,12 @@ export type POI = {
         latitude: number;
         longitude: number;
     };
-    // TODO: non-optional
     imageName?: string;
     // TODO: non-optional
     audioName?: string;
+
+    polygon: {
+        path: Array<[number, number]>; // [lat, lng] (Leaflet order)
+        options: L.PathOptions;
+    };
 };
