@@ -1,4 +1,5 @@
 import { Observable } from "../observable";
+import { debug } from "../utils";
 import { deafaultFeatureFlags } from "./feature-flags";
 import {
     type FeatureFlags,
@@ -12,7 +13,9 @@ type NotificationType = {
 };
 
 export class FeatureFlagProvider extends Observable<NotificationType> {
-    constructor(private featureFlags: Record<FeatureFlagKey, FeatureFlagType>) {
+    constructor(
+        public readonly featureFlags: Record<FeatureFlagKey, FeatureFlagType>,
+    ) {
         super();
     }
 
@@ -21,6 +24,7 @@ export class FeatureFlagProvider extends Observable<NotificationType> {
     }
 
     set(key: FeatureFlagKey, value: boolean) {
+        debug(`setting ${key} to ${value}`);
         this.featureFlags[key].value = value;
 
         this.notify({
