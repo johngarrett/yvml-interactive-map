@@ -1,6 +1,7 @@
 import type { POI } from "../types";
 import L from "leaflet";
 import { debug } from "../utils";
+import { getFeatureFlagProviderOrThrow } from "../feature-flags";
 
 type POIPolygonControllerParams = {
     POIs: POI[];
@@ -95,7 +96,21 @@ export class POIPolygonController {
     constructor({ POIs }: POIPolygonControllerParams) {
         // TODO: attach listener
 
-        this.layer = L.layerGroup(POIs.flatMap(poiToLayers));
+        getFeatureFlagProviderOrThrow().addListener(({ key, value }) => {
+            if (key === "polygons") {
+                if (value === true) {
+                    this.layer = L.layerGroup(POIs.flatMap(poiToLayers));
+                } else {
+                    this.layer = L.layerGroup();
+                }
+            }
+        });
+
+        if (getFeatureFlagProviderOrThrow().get("polygons").value === true) {
+            this.layer = L.layerGroup(POIs.flatMap(poiToLayers));
+        } else {
+            this.layer = L.layerGroup();
+        }
     }
 
     public layer: L.LayerGroup;
