@@ -9,12 +9,15 @@ import {
 import { SettingsMenu } from "./settings";
 import { locationStoreInstance, LocationTracker } from "./location";
 import { ConsoleTracker } from "./console";
+import { initFeatureFlagProvider } from "./feature-flags";
 
 import "./styles.css"; // TODO: remove tailwind and import normally
 
 import "leaflet-rotate";
 
 import "leaflet.offline"; // temp
+
+initFeatureFlagProvider();
 
 new ConsoleTracker();
 new SettingsMenu();

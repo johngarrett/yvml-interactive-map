@@ -1,6 +1,7 @@
 import type { POI } from "../types";
 import L from "leaflet";
-import { debug } from "../utils";
+import { debug, warn } from "../utils";
+import { getFeatureFlagProviderOrThrow } from "../feature-flags";
 
 type POIPolygonControllerParams = {
     POIs: POI[];
@@ -95,7 +96,34 @@ export class POIPolygonController {
     constructor({ POIs }: POIPolygonControllerParams) {
         // TODO: attach listener
 
-        this.layer = L.layerGroup(POIs.flatMap(poiToLayers));
+        getFeatureFlagProviderOrThrow().addListener(({ key, value }) => {
+            debug(`[POIPolygonController] got an udate ${key}, ${value}`);
+            if (key !== "polygons") {
+                return;
+            }
+            if (value === true) {
+                debug(`[POIPolygonController] showing layer`);
+                if (this.layer.getLayers().length === 1) {
+                    warn(
+                        `[POIPolygonController] returning early, layer already present`,
+                    );
+                    return;
+                }
+                POIs.flatMap(poiToLayers).forEach((layer) => {
+                    this.layer.addLayer(layer);
+                });
+            } else {
+                this.layer.clearLayers();
+                debug(`[POIPolygonController] removing layer`);
+            }
+        });
+
+        const showPolygons =
+            getFeatureFlagProviderOrThrow().get("polygons").value;
+
+        this.layer = L.layerGroup(
+            showPolygons ? POIs.flatMap(poiToLayers) : [],
+        );
     }
 
     public layer: L.LayerGroup;
