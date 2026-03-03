@@ -40,7 +40,7 @@ initMap({
     config: {
         initialLocation: [34.181983, -116.414443],
         initialZoom: 19,
-        defaultLayer: tileLayers.satellite,
+        defaultLayer: tileLayers.drone,
         tileLayers,
         mapOptions: {
             rotate: true,
