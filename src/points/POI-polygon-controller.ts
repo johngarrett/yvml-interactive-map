@@ -122,7 +122,9 @@ export class POIPolygonController {
             getFeatureFlagProviderOrThrow().get("polygons").value;
 
         this.layer = L.layerGroup(
-            showPolygons ? POIs.flatMap(poiToLayers) : [],
+            showPolygons
+                ? POIs.flatMap((poi) => poiToLayers(poi, poiTracker))
+                : [],
         );
     }
 

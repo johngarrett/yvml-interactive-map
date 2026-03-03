@@ -33,12 +33,15 @@ export const initMap = (params: MapParameters) => {
     const { config } = params;
     const { poiTracker, locationTracker } = params.providers;
 
-    const map = L.map("map", config.mapOptions)
-        .setView(config.initialLocation, config.initialZoom)
-        .on("click", () => {
-            // deselect the active POI when the user clicks outside on the map
-            poiTracker.deselectActive();
-        });
+    const map = L.map("map", config.mapOptions).setView(
+        config.initialLocation,
+        config.initialZoom,
+    );
+    // this conflicts with the polygons. TODO
+    //.on("click", () => {
+    //    // deselect the active POI when the user clicks outside on the map
+    //    //poiTracker.deselectActive();
+    //});
 
     config.defaultLayer.addTo(map);
 
