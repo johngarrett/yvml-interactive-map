@@ -4,6 +4,7 @@ import { debug } from "../utils";
 
 export class POITracker extends Observable<POI | undefined> {
     select(poi: POI) {
+        debug(`[POITracker] ${poi} selected`);
         if (poi.id === this.activePOI?.id) {
             debug("[POITracker] POI already active, returning early");
             return;

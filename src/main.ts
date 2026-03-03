@@ -33,7 +33,7 @@ new POIController({ poiTracker });
 /**
  * controlls showing the polygons for POIs
  */
-const polygonController = new POIPolygonController({ POIs });
+const polygonController = new POIPolygonController({ POIs, poiTracker });
 
 initMap({
     POIs,

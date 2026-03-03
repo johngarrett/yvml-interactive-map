@@ -4,7 +4,7 @@ export const deafaultFeatureFlags = {
     polygons: {
         name: "polygons",
         description: "Enable polygon shapes around buildings",
-        value: false,
+        value: true,
     },
     console: {
         name: "console",
