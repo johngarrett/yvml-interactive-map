@@ -2,9 +2,11 @@ import type { POI } from "../types";
 import L from "leaflet";
 import { debug, warn } from "../utils";
 import { getFeatureFlagProviderOrThrow } from "../feature-flags";
+import type { POITracker } from "./POI-tracker";
 
 type POIPolygonControllerParams = {
     POIs: POI[];
+    poiTracker: POITracker;
 };
 
 // TODO: font
@@ -82,18 +84,22 @@ const poiToLabel = (poi: POI) => {
     return svgElement;
 };
 
-const poiToLayers = (poi: POI) => {
+const poiToLayers = (poi: POI, poiTracker: POITracker) => {
     const polygon = L.polygon(poi.polygon.path, poi.polygon.options);
 
     //const label = L.svgOverlay(poiToLabel(poi), polygon.getBounds(), {
     //    interactive: false,
     //});
 
+    polygon.on("click", () => {
+        debug("[poiToLayers] clicked");
+        poiTracker.select(poi);
+    });
     return [polygon /* label */];
 };
 
 export class POIPolygonController {
-    constructor({ POIs }: POIPolygonControllerParams) {
+    constructor({ POIs, poiTracker }: POIPolygonControllerParams) {
         // TODO: attach listener
 
         getFeatureFlagProviderOrThrow().addListener(({ key, value }) => {
@@ -109,9 +115,11 @@ export class POIPolygonController {
                     );
                     return;
                 }
-                POIs.flatMap(poiToLayers).forEach((layer) => {
-                    this.layer.addLayer(layer);
-                });
+                POIs.flatMap((poi) => poiToLayers(poi, poiTracker)).forEach(
+                    (layer) => {
+                        this.layer.addLayer(layer);
+                    },
+                );
             } else {
                 this.layer.clearLayers();
                 debug(`[POIPolygonController] removing layer`);
