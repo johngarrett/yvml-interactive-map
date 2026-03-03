@@ -85,11 +85,11 @@ const poiToLabel = (poi: POI) => {
 const poiToLayers = (poi: POI) => {
     const polygon = L.polygon(poi.polygon.path, poi.polygon.options);
 
-    const label = L.svgOverlay(poiToLabel(poi), polygon.getBounds(), {
-        interactive: false,
-    });
+    //const label = L.svgOverlay(poiToLabel(poi), polygon.getBounds(), {
+    //    interactive: false,
+    //});
 
-    return [polygon, label];
+    return [polygon /* label */];
 };
 
 export class POIPolygonController {
