@@ -22,10 +22,9 @@ const satelliteLayer = tileLayer(
 );
 
 const droneLayer = tileLayer(
-    `${import.meta.env.BASE_URL}tiles/{z}/{x}/{y}.png`,
+    `${import.meta.env.BASE_URL}tiles/{z}/{x}/{y}.jpg`,
     {
         minZoom: 18,
-        tms: true,
         maxZoom: 23,
         maxNativeZoom: 23,
         tileSize: 256,

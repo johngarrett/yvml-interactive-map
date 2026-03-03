@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
     <TileMap version="1.0.0" tilemapservice="http://tms.osgeo.org/1.0.0">
-      <Title>far out_modified.tif</Title>
+      <Title>out_modified.tif</Title>
       <Abstract></Abstract>
       <SRS>EPSG:3857</SRS>
       <BoundingBox minx="-116.41477290145951" miny="34.18128425237195" maxx="-116.41376649693434" maxy="34.18273780003899"/>
       <Origin x="-116.41477290145951" y="34.18128425237195"/>
-      <TileFormat width="256" height="256" mime-type="image/png" extension="png"/>
+      <TileFormat width="256" height="256" mime-type="image/jpg" extension="jpg"/>
       <TileSets profile="mercator">
         <TileSet href="18" units-per-pixel="0.59716428337097" order="18"/>
         <TileSet href="19" units-per-pixel="0.29858214168549" order="19"/>
