@@ -19,10 +19,11 @@ export class LocationController {
         initialPoints,
     }: LocationControllerParams) {
         this.pathLine = L.polyline(initialPoints ?? [], {
-            color: "gray",
+            color: "black",
             weight: 20,
             smoothFactor: 2,
             opacity: 0.5,
+            dashArray: "15 60", // dash length, gap length (in pixels)
         });
 
         this.layer = L.layerGroup([
