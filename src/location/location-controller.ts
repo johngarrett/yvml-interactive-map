@@ -1,14 +1,20 @@
 import { debug } from "../utils";
 import type { LocationTracker } from "./location-tracker";
+import type { OrientationTracker, OrientationData } from "./orientation-tracker";
 import type { LocationPoint } from "./types";
 import L, { LatLng } from "leaflet";
 
 type LocationControllerParams = {
     locationTracker: LocationTracker;
+    orientationTracker: OrientationTracker;
     initialPoints?: LatLng[];
 };
 export class LocationController {
-    constructor({ locationTracker, initialPoints }: LocationControllerParams) {
+    constructor({
+        locationTracker,
+        orientationTracker,
+        initialPoints,
+    }: LocationControllerParams) {
         this.pathLine = L.polyline(initialPoints ?? [], {
             color: "gray",
             weight: 20,
@@ -21,6 +27,7 @@ export class LocationController {
         ]);
 
         locationTracker.addListener(this.handleNewLocation);
+        orientationTracker.addListener(this.handleNewOrientation);
     }
 
     private handleNewLocation = ({
@@ -48,6 +55,11 @@ export class LocationController {
         }
     };
 
+    private handleNewOrientation = ({ heading }: OrientationData) => {
+        debug("[LocationController] new orientation heading received", heading);
+        this.heading = heading;
+    };
+
     /**
      * Manually redraw the location circle during map movements.
      *
@@ -64,5 +76,6 @@ export class LocationController {
 
     private pathLine: L.Polyline;
     private locationMarker: L.Circle | undefined;
+    private heading: number | undefined;
     public layer: L.LayerGroup;
 }
