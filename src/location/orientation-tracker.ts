@@ -8,6 +8,7 @@ export type OrientationData = {
     //beta: number | undefined;
     //gamma: number | undefined;
     absolute: boolean;
+    //webkitCompassHeading: unknown;
 };
 
 export class OrientationTracker extends Observable<OrientationData> {
@@ -47,6 +48,7 @@ export class OrientationTracker extends Observable<OrientationData> {
     private orientationListener = (event: DeviceOrientationEvent) => {
         this.notify({
             alpha: event.alpha ?? undefined,
+            //webkitCompassHeading: event.webkitCompassHeading
             absolute: event.absolute ?? false,
         });
     };

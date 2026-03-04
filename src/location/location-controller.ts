@@ -1,14 +1,20 @@
 import { debug } from "../utils";
 import type { LocationTracker } from "./location-tracker";
+import type { OrientationTracker } from "./orientation-tracker";
 import type { LocationPoint } from "./types";
 import L, { LatLng } from "leaflet";
 
 type LocationControllerParams = {
     locationTracker: LocationTracker;
+    orientationTracker: OrientationTracker;
     initialPoints?: LatLng[];
 };
 export class LocationController {
-    constructor({ locationTracker, initialPoints }: LocationControllerParams) {
+    constructor({
+        locationTracker,
+        orientationTracker,
+        initialPoints,
+    }: LocationControllerParams) {
         this.pathLine = L.polyline(initialPoints ?? [], {
             color: "blue",
             weight: 4,
@@ -20,6 +26,7 @@ export class LocationController {
         ]);
 
         locationTracker.addListener(this.handleNewLocation);
+        orientationTracker.addListener(this.handleNewOrientation);
     }
 
     private handleNewLocation = ({
