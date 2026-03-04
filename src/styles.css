@@ -21,6 +21,7 @@ html,
 body {
   margin: 0;
   height: 100%;
+  background-color: #000;
   font-family: Futura, Helvetica, Arial, sans-serif;
 }
 

@@ -53,8 +53,8 @@ const polygonController = new POIPolygonController({ POIs, poiTracker });
 initMap({
     POIs,
     config: {
-        initialLocation: [34.181983, -116.414443],
-        initialZoom: 19,
+        initialLocation: [34.181922, -116.414579],
+        initialZoom: 21,
         defaultLayer: tileLayers.drone,
         tileLayers,
         mapOptions: {

@@ -16,9 +16,10 @@ export class LocationController {
         initialPoints,
     }: LocationControllerParams) {
         this.pathLine = L.polyline(initialPoints ?? [], {
-            color: "blue",
-            weight: 4,
-            smoothFactor: 1.5,
+            color: "gray",
+            weight: 20,
+            smoothFactor: 20,
+            opacity: 0.5,
         });
 
         this.layer = L.layerGroup([
@@ -36,8 +37,6 @@ export class LocationController {
     }: LocationPoint) => {
         debug("[LocationController] new location added");
         this.pathLine.addLatLng([latitude, longitude]);
-
-        // TODO: compass
 
         if (!this.locationMarker) {
             debug(`adding locationMarker ${latitude}) ${longitude}`);

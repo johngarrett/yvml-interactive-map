@@ -18,6 +18,10 @@ export class LocationStore {
 
     private handleNewLocation = (point: LocationPoint) => {
         /**
+         * Only add if the location is within YVML
+         */
+
+        /**
          * Only add if the distance between two points is great enough
          */
         const previousPoint = this.data[this.data.length - 1];
