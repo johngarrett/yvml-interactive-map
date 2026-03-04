@@ -10,7 +10,7 @@ type LocationControllerParams = {
 export class LocationController {
     constructor({ locationTracker, initialPoints }: LocationControllerParams) {
         this.pathLine = L.polyline(initialPoints ?? [], {
-            color: "blue",
+            color: "gray",
             weight: 4,
             smoothFactor: 1.5,
         });
