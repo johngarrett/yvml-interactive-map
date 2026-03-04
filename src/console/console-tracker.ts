@@ -29,7 +29,7 @@ export class ConsoleTracker {
         this.consoleElement.appendChild(line);
 
         // Auto-scroll to bottom
-        this.consoleElement.scrollTop = this.consoleElement.scrollHeight;
+        //this.consoleElement.scrollTop = this.consoleElement.scrollHeight;
     };
 
     private consoleElement: HTMLElement;

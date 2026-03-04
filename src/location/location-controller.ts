@@ -1,6 +1,9 @@
 import { debug } from "../utils";
 import type { LocationTracker } from "./location-tracker";
-import type { OrientationTracker, OrientationData } from "./orientation-tracker";
+import type {
+    OrientationTracker,
+    OrientationData,
+} from "./orientation-tracker";
 import type { LocationPoint } from "./types";
 import L, { LatLng } from "leaflet";
 
@@ -18,7 +21,7 @@ export class LocationController {
         this.pathLine = L.polyline(initialPoints ?? [], {
             color: "gray",
             weight: 20,
-            smoothFactor: 20,
+            smoothFactor: 2,
             opacity: 0.5,
         });
 
