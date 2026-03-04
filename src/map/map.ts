@@ -49,25 +49,26 @@ export const initMap = (params: MapParameters) => {
     );
 
     // TODO: maybe these should go elsewhere
-
-    let lastHeading: number | undefined;
+    let currentBearing: number | undefined;
+    let targetBearing: number | undefined;
     let animationFrame: number | undefined;
 
     orientationTracker.addListener(({ heading }) => {
         const normalized = ((heading % 360) + 360) % 360;
 
-        // Invert for map rotation
-        const target = (360 - normalized) % 360;
+        // invert for map
+        const corrected = (360 - normalized) % 360;
 
-        if (lastHeading === undefined) {
-            debug(`[map] initial bearing ${target}`);
-            lastHeading = target;
-            map.setBearing(target);
+        if (currentBearing === undefined) {
+            currentBearing = corrected;
+            targetBearing = corrected;
+            map.setBearing(corrected);
+            debug(`[map] initial bearing ${corrected}`);
             return;
         }
 
-        // shortest angular delta (-180 → 180)
-        let delta = target - lastHeading;
+        // shortest delta
+        let delta = corrected - currentBearing;
         delta = ((delta + 540) % 360) - 180;
 
         if (Math.abs(delta) < 5) {
@@ -75,45 +76,40 @@ export const initMap = (params: MapParameters) => {
             return;
         }
 
-        debug(
-            `[map] animating from ${lastHeading.toFixed(1)} → ${target.toFixed(
-                1,
-            )} (delta=${delta.toFixed(1)})`,
-        );
+        targetBearing = corrected;
+        debug(`[map] new target ${targetBearing.toFixed(1)}`);
 
-        const start = lastHeading;
-        const end = lastHeading + delta;
-        const duration = 120;
-        const startTime = performance.now();
+        if (animationFrame === undefined) {
+            animate();
+        }
+    });
 
-        if (animationFrame !== undefined) {
-            debug(`[map] cancel previous animation`);
-            cancelAnimationFrame(animationFrame);
+    function animate() {
+        if (currentBearing === undefined || targetBearing === undefined) {
             animationFrame = undefined;
+            return;
         }
 
-        const animate = (now: number) => {
-            const t = Math.min((now - startTime) / duration, 1);
+        let delta = targetBearing - currentBearing;
+        delta = ((delta + 540) % 360) - 180;
 
-            // easeOut cubic
-            const eased = 1 - Math.pow(1 - t, 3);
+        // smoothing factor (lower = smoother)
+        const step = delta * 0.15;
 
-            const current = start + delta * eased;
-            const wrapped = ((current % 360) + 360) % 360;
+        if (Math.abs(delta) < 0.3) {
+            currentBearing = targetBearing;
+            map.setBearing(currentBearing);
+            debug(`[map] settled at ${currentBearing.toFixed(1)}`);
+            animationFrame = undefined;
+            return;
+        }
 
-            map.setBearing(wrapped);
+        currentBearing = (((currentBearing + step) % 360) + 360) % 360;
 
-            if (t < 1) {
-                animationFrame = requestAnimationFrame(animate);
-            } else {
-                lastHeading = ((end % 360) + 360) % 360;
-                animationFrame = undefined;
-                debug(`[map] animation complete at ${lastHeading.toFixed(1)}`);
-            }
-        };
+        map.setBearing(currentBearing);
 
         animationFrame = requestAnimationFrame(animate);
-    });
+    }
 
     locationTracker.addListener(({ latitude, longitude }) => {
         // TODO: only if the location is within the bounds -- or should that happen higher up?
