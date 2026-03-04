@@ -1,5 +1,19 @@
-export class OrientationTracker {
-    constructor() {}
+import { Observable } from "../observable";
+
+export type OrientationData = {
+    /**
+     * Rotation around the z-axis
+     */
+    alpha: number | undefined;
+    //beta: number | undefined;
+    //gamma: number | undefined;
+    absolute: boolean;
+};
+
+export class OrientationTracker extends Observable<OrientationData> {
+    constructor() {
+        super();
+    }
 
     public requestOrientationPermission = async (): Promise<boolean> => {
         // iOS 13+ requires explicit permission
@@ -26,5 +40,14 @@ export class OrientationTracker {
         }
     };
 
-    private startOrientationTracking() {}
+    private startOrientationTracking = () => {
+        window.addEventListener("deviceorientation", this.orientationListener);
+    };
+
+    private orientationListener = (event: DeviceOrientationEvent) => {
+        this.notify({
+            alpha: event.alpha ?? undefined,
+            absolute: event.absolute ?? false,
+        });
+    };
 }
