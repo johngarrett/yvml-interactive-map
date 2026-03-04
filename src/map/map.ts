@@ -60,6 +60,7 @@ export const initMap = (params: MapParameters) => {
     });
 
     locationTracker.addListener(({ latitude, longitude }) => {
+        // TODO: only if the location is within the bounds -- or should that happen higher up?
         map.setView([latitude, longitude], map.getZoom(), {
             animate: true,
         });
