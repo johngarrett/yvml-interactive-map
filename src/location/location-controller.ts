@@ -26,7 +26,7 @@ export class LocationController {
         latitude,
         longitude,
         accuracy,
-    }: LocationPoint) => {
+    }: LocationPoint) {
         debug("[LocationController] new location added");
         this.pathLine.addLatLng([latitude, longitude]);
 
