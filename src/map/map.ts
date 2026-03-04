@@ -49,14 +49,28 @@ export const initMap = (params: MapParameters) => {
     );
 
     // TODO: maybe these should go elsewhere
-    let lastRotation = 0; // maybe the tracker should limit
-    orientationTracker.addListener(({ heading }) => {
-        const now = performance.now();
-        if (now - lastRotation < 50) return; // 20fps cap
-        lastRotation = now;
 
+    let lastSnappedHeading: number | undefined;
+    orientationTracker.addListener(({ heading }) => {
+        if (heading == null) return;
+
+        // Normalize to 0–360
+        const normalized = ((heading % 360) + 360) % 360;
+
+        // map is upside down
+        const corrected = (normalized + 180) % 360;
+
+        // Snap to 15° increments
+        const snapped = (Math.round(corrected / 15) * 15) % 360;
+
+        // Prevent unnecessary updates
+        if (lastSnappedHeading === snapped) return;
+
+        lastSnappedHeading = snapped;
+
+        // --- APPLY ROTATION ---
         debug(`[map] setting heading`);
-        map.setBearing(heading); // TODO: type
+        map.setBearing(180 - heading); // TODO: type
     });
 
     locationTracker.addListener(({ latitude, longitude }) => {
