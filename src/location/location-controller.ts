@@ -11,8 +11,9 @@ export class LocationController {
     constructor({ locationTracker, initialPoints }: LocationControllerParams) {
         this.pathLine = L.polyline(initialPoints ?? [], {
             color: "gray",
-            weight: 4,
-            smoothFactor: 1.5,
+            weight: 20,
+            smoothFactor: 20,
+            opacity: 0.5,
         });
 
         this.layer = L.layerGroup([
