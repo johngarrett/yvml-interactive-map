@@ -1,13 +1,24 @@
+import { getFeatureFlagProviderOrThrow } from "../feature-flags";
 import { getElementOrThrow, logger, type LogLevel } from "../utils";
 
 export class ConsoleTracker {
     constructor() {
         this.consoleElement = getElementOrThrow({ id: "console" });
-        logger.subscribe(this.loggerSubscription);
+        this.unsubscribeFn = logger.subscribe(this.loggerSubscription);
 
         // TODO:
         //const showConsole = getFeatureFlagProviderOrThrow().get("console").value;
     }
+
+    //private handleVisibilityChange = (show: boolean) => {
+    //  if (show) {
+    //    this.unsubscribeFn();
+    //    logger.subscribe(this.loggerSubscription);
+    //    this.consoleElement.className
+
+    //  }
+
+    //}
 
     loggerSubscription = (level: LogLevel, messages: unknown[]) => {
         const line = document.createElement("div");
@@ -22,4 +33,5 @@ export class ConsoleTracker {
     };
 
     private consoleElement: HTMLElement;
+    private unsubscribeFn: () => void;
 }
