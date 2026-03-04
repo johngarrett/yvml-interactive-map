@@ -23,13 +23,13 @@ export class LocationStore {
         const previousPoint = this.data[this.data.length - 1];
 
         if (previousPoint) {
-            let current = L.latLng(point.latitude, point.longitude);
-            let previous = L.latLng(
+            const current = L.latLng(point.latitude, point.longitude);
+            const previous = L.latLng(
                 previousPoint?.latitude,
                 previousPoint?.longitude,
             );
 
-            let distanceInMeters = current.distanceTo(previous);
+            const distanceInMeters = current.distanceTo(previous);
 
             debug(
                 `[LocationStore] distance between ${current} and ${previous} = ${distanceInMeters}`,
