@@ -1,4 +1,4 @@
-import { getFeatureFlagProviderOrThrow } from "../feature-flags";
+import { getConfig } from "../config";
 import { getElementOrThrow, logger, type LogLevel } from "../utils";
 
 export class ConsoleTracker {
@@ -7,7 +7,7 @@ export class ConsoleTracker {
         this.unsubscribeFn = logger.subscribe(this.loggerSubscription);
 
         // TODO:
-        //const showConsole = getFeatureFlagProviderOrThrow().get("console").value;
+        //const showConsole = getConfig().getFeature("console").value;
     }
 
     //private handleVisibilityChange = (show: boolean) => {

@@ -9,7 +9,7 @@ import {
 import { SettingsMenu } from "./settings";
 import { LocationStore, LocationTracker, OrientationTracker } from "./location";
 import { ConsoleTracker } from "./console";
-import { getFeatureFlagProviderOrThrow, initFeatureFlagProvider } from "./feature-flags";
+import { getConfig, initConfig } from "./config";
 
 import "./styles.css"; // TODO: remove tailwind and import normally
 
@@ -23,7 +23,7 @@ import { debug } from "./utils";
 import { LocationController } from "./location/location-controller";
 import { MapMovementController } from "./map/map-movement-controller";
 
-initFeatureFlagProvider();
+initConfig();
 
 new ConsoleTracker();
 new SettingsMenu();
@@ -86,7 +86,7 @@ new MapMovementController({
     map,
     locationTracker,
     orientationTracker,
-    featureFlagProvider: getFeatureFlagProviderOrThrow(),
+    configStore: getConfig(),
 });
 
 setInterval(() => {
