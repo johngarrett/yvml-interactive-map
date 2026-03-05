@@ -1,5 +1,6 @@
 import { tileLayers } from "./map/layers";
 import { initMap } from "./map/map";
+import L from "leaflet";
 import {
     POIController,
     POIPolygonController,
@@ -23,7 +24,13 @@ import { debug } from "./utils";
 import { LocationController } from "./location/location-controller";
 import { MapMovementController } from "./map/map-movement-controller";
 
-initConfig();
+initConfig({
+    bounds: L.latLngBounds(
+        [34.18152307750378, -116.41490672855878], // south-west
+        [34.18253355653219, -116.41373685883292], // north-east
+    ),
+});
+const configStore = getConfig();
 
 new ConsoleTracker();
 new SettingsMenu();
@@ -86,8 +93,19 @@ new MapMovementController({
     map,
     locationTracker,
     orientationTracker,
-    configStore: getConfig(),
+    configStore,
 });
+
+const bounds = configStore.getBounds();
+// TODO: temporary -- maybe setBounds
+if (bounds) {
+    L.rectangle(bounds, {
+        color: "#ff3b30",
+        weight: 2,
+        fill: false,
+        interactive: false,
+    }).addTo(map);
+}
 
 setInterval(() => {
     locationStore.saveToStorage();
