@@ -28,9 +28,4 @@ export type BoundsUpdateEvent = {
     value: L.LatLngBounds;
 };
 
-export type RootUpdateEvent = {
-    key: Exclude<string, "features" | "bounds">;
-    value: unknown;
-};
-
-export type ConfigEvent = FeatureUpdateEvent | BoundsUpdateEvent | RootUpdateEvent;
+export type ConfigEvent = FeatureUpdateEvent | BoundsUpdateEvent;
