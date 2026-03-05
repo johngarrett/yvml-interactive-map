@@ -155,9 +155,7 @@ export class LocationTracker extends Observable<LocationPoint> {
                 : Math.max(0, timestampMs - this.lastFrameTs);
         this.lastFrameTs = timestampMs;
 
-        // Clamp delta to avoid one-frame catch-up jumps after long frame gaps.
-        const clampedDtMs = Math.min(dtMs, this.maxFrameDeltaMs);
-        const alpha = 1 - Math.exp(-clampedDtMs / this.tauMs);
+        const alpha = 1 - Math.exp(-dtMs / this.tauMs);
 
         this.currentPoint = this.interpolatePoint(
             this.currentPoint,
@@ -265,10 +263,8 @@ export class LocationTracker extends Observable<LocationPoint> {
     private frameId: number | undefined;
     // Previous RAF timestamp used to compute frame delta.
     private lastFrameTs: number | undefined;
-    // Exponential smoothing time constant. Higher is smoother/slower.
-    private readonly tauMs = 800;
-    // Caps frame delta used for smoothing to avoid large single-frame jumps.
-    private readonly maxFrameDeltaMs = 100;
+    // Exponential smoothing time constant.
+    private readonly tauMs = 450;
     // Stop smoothing when converged within this radius.
     private readonly snapDistanceMeters = 0.5;
     // Snap immediately for large discontinuities.
