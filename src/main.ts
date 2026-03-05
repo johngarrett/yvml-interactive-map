@@ -24,12 +24,7 @@ import { debug } from "./utils";
 import { LocationController } from "./location/location-controller";
 import { MapMovementController } from "./map/map-movement-controller";
 
-initConfig({
-    bounds: L.latLngBounds(
-        [34.18152307750378, -116.41490672855878], // south-west
-        [34.18253355653219, -116.41373685883292], // north-east
-    ),
-});
+initConfig();
 const configStore = getConfig();
 
 new ConsoleTracker();

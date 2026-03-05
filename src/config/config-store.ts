@@ -1,6 +1,6 @@
 import { Observable } from "../observable";
 import { debug } from "../utils";
-import { defaultFeatures } from "./default-features";
+import { defaultConfig } from "./default-config";
 import {
     type Config,
     type ConfigEvent,
@@ -50,9 +50,10 @@ export const initConfig = (
     },
 ) => {
     configStore = new ConfigStore({
+        ...defaultConfig,
         ...config,
         features: {
-            ...defaultFeatures,
+            ...defaultConfig.features,
             ...(config?.features ?? {}),
         },
     });
