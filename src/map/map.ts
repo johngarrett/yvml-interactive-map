@@ -5,6 +5,7 @@ import { POITracker } from "../points";
 import { debug } from "../utils";
 import type { LocationController } from "../location/location-controller";
 import type { LocationTracker, OrientationTracker } from "../location";
+import { rotateMap } from "./rotate-map";
 
 type MapConfiguration = {
     initialLocation: [number, number];
@@ -48,104 +49,10 @@ export const initMap = (params: MapParameters) => {
         config.initialZoom,
     );
 
-    // TODO: this is AI generated. put code elsewhere and study (it works really well)
-    /**
-     * Smoothly rotates the map toward device heading.
-     *
-     * Design goals:
-     * - Ignore small compass jitter (<5°)
-     * - Always rotate via shortest arc (-180 → 180)
-     * - Never cancel/restart animations (prevents flashing)
-     * - Continuously ease toward latest heading
-     * - Invert heading so map rotates opposite device rotation
-     *
-     * Architecture:
-     * - `currentBearing` = live animated value (what map is currently showing)
-     * - `targetBearing`  = most recent desired heading
-     * - One persistent animation loop that "chases" the target
-     */
-
-    let currentBearing: number | undefined;
-    let targetBearing: number | undefined;
-    let animationFrame: number | undefined;
-
-    orientationTracker.addListener(({ heading }) => {
-        // Normalize heading to 0–360
-        const normalized = ((heading % 360) + 360) % 360;
-
-        // Invert for map rotation:
-        // When user turns left, map should rotate clockwise.
-        const corrected = (360 - normalized) % 360;
-
-        // First heading received → initialize map immediately.
-        if (currentBearing === undefined) {
-            currentBearing = corrected;
-            targetBearing = corrected;
-            map.setBearing(corrected);
-            debug(`[map] initial bearing ${corrected}`);
-            return;
-        }
-
-        // Compute shortest angular difference (-180 to 180)
-        let delta = corrected - currentBearing;
-        delta = ((delta + 540) % 360) - 180;
-
-        // Ignore small compass jitter
-        if (Math.abs(delta) < 5) {
-            debug(`[map] ignored jitter delta=${delta.toFixed(2)}`);
-            return;
-        }
-
-        // Update target bearing (animation loop will chase it)
-        targetBearing = corrected;
-        debug(`[map] new target ${targetBearing.toFixed(1)}`);
-
-        // Start animation loop if not already running
-        if (animationFrame === undefined) {
-            animate();
-        }
+    rotateMap({
+        orientationTracker,
+        setBearing: (bearing) => map.setBearing(bearing),
     });
-
-    /**
-     * Animation loop.
-     *
-     * Runs continuously until currentBearing converges on targetBearing.
-     * Uses proportional step easing (spring-like motion).
-     */
-    function animate() {
-        if (currentBearing === undefined || targetBearing === undefined) {
-            animationFrame = undefined;
-            return;
-        }
-
-        // Shortest angular delta
-        let delta = targetBearing - currentBearing;
-        delta = ((delta + 540) % 360) - 180;
-
-        // Smoothing factor:
-        // - Lower (0.1) = softer, floaty
-        // - Higher (0.25) = tighter, more responsive
-        const smoothing = 0.15;
-
-        // Step toward target
-        const step = delta * smoothing;
-
-        // If close enough → snap to final value and stop animating
-        if (Math.abs(delta) < 0.3) {
-            currentBearing = targetBearing;
-            map.setBearing(currentBearing); // TODO: type
-            debug(`[map] settled at ${currentBearing.toFixed(1)}`);
-            animationFrame = undefined;
-            return;
-        }
-
-        // Apply step and normalize
-        currentBearing = (((currentBearing + step) % 360) + 360) % 360;
-
-        map.setBearing(currentBearing);
-
-        animationFrame = requestAnimationFrame(animate);
-    }
 
     locationTracker.addListener(({ latitude, longitude }) => {
         // TODO: only if the location is within the bounds -- or should that happen higher up?
