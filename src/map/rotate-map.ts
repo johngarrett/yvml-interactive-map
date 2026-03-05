@@ -9,7 +9,7 @@ export const rotateMap = ({
     orientationTracker,
     setBearing,
 }: RotateMapParams) => {
-    orientationTracker.addListener(({ heading }) => {
+    return orientationTracker.addListener(({ heading }) => {
         // Invert for map rotation:
         // when user turns left, map should rotate clockwise.
         const corrected = (360 - heading) % 360;

@@ -6,6 +6,7 @@ import { debug } from "../utils";
 import type { LocationController } from "../location/location-controller";
 import type { LocationTracker, OrientationTracker } from "../location";
 import { rotateMap } from "./rotate-map";
+import { getFeatureFlagProviderOrThrow } from "../feature-flags";
 
 type MapConfiguration = {
     initialLocation: [number, number];
@@ -49,17 +50,59 @@ export const initMap = (params: MapParameters) => {
         config.initialZoom,
     );
 
-    rotateMap({
-        orientationTracker,
-        setBearing: (bearing) => map.setBearing(bearing),
+    let unsubscribeLocationFollow: (() => void) | undefined;
+    let unsubscribeRotation: (() => void) | undefined;
+
+    const enableFollowAndRotate = () => {
+        if (!unsubscribeLocationFollow) {
+            unsubscribeLocationFollow = locationTracker.addListener(
+                ({ latitude, longitude }) => {
+                    // TODO: only if the location is within the bounds -- or should that happen higher up?
+                    map.setView([latitude, longitude], map.getZoom(), {
+                        animate: true,
+                    });
+                },
+            );
+        }
+
+        if (!unsubscribeRotation) {
+            unsubscribeRotation = rotateMap({
+                orientationTracker,
+                setBearing: (bearing) => map.setBearing(bearing),
+            });
+        }
+    };
+
+    const disableFollowAndRotate = () => {
+        if (unsubscribeLocationFollow) {
+            unsubscribeLocationFollow();
+            unsubscribeLocationFollow = undefined;
+        }
+        if (unsubscribeRotation) {
+            unsubscribeRotation();
+            unsubscribeRotation = undefined;
+        }
+    };
+
+    const featureFlagProvider = getFeatureFlagProviderOrThrow();
+    if (featureFlagProvider.get("locationFollowAndRotate").value) {
+        enableFollowAndRotate();
+    } else {
+        disableFollowAndRotate();
+    }
+
+    featureFlagProvider.addListener(({ key, value }) => {
+        if (key !== "locationFollowAndRotate") {
+            return;
+        }
+
+        if (value) {
+            enableFollowAndRotate();
+        } else {
+            disableFollowAndRotate();
+        }
     });
 
-    locationTracker.addListener(({ latitude, longitude }) => {
-        // TODO: only if the location is within the bounds -- or should that happen higher up?
-        map.setView([latitude, longitude], map.getZoom(), {
-            animate: true,
-        });
-    });
     // this conflicts with the polygons. TODO
     //.on("click", () => {
     //    // deselect the active POI when the user clicks outside on the map
