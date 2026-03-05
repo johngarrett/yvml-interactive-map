@@ -111,28 +111,29 @@ export class LocationController {
         }
 
         if (!this.headingMarker) {
-            this.headingMarker = L.marker(this.latestLocation, {
-                icon: L.divIcon({
-                    className: "location-heading-marker",
-                    // TODO: explore not using raw html here
-                    html: `<img src="${LocationController.headingIconSrc}" alt="" aria-hidden="true" class="location-heading-icon" />`,
-                    iconSize: [24, 24],
-                    iconAnchor: [12, 12],
-                }),
-                interactive: false,
-            });
-            this.layer.addLayer(this.headingMarker);
+            // looks ugly, compass accuracy isnt good enough
+            //this.headingMarker = L.marker(this.latestLocation, {
+            //    icon: L.divIcon({
+            //        className: "location-heading-marker",
+            //        // TODO: explore not using raw html here
+            //        html: `<img src="${LocationController.headingIconSrc}" alt="" aria-hidden="true" class="location-heading-icon" />`,
+            //        iconSize: [24, 24],
+            //        iconAnchor: [12, 12],
+            //    }),
+            //    interactive: false,
+            //});
+            //this.layer.addLayer(this.headingMarker);
         } else {
             this.headingMarker.setLatLng(this.latestLocation);
         }
 
-        const markerElement = this.headingMarker.getElement();
-        if (markerElement) {
-            markerElement.style.setProperty(
-                "--heading-deg",
-                `${this.latestHeading}deg`,
-            );
-        }
+        //const markerElement = this.headingMarker.getElement();
+        //if (markerElement) {
+        //    markerElement.style.setProperty(
+        //        "--heading-deg",
+        //        `${this.latestHeading}deg`,
+        //    );
+        //}
     };
 
     /**
