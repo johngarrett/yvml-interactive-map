@@ -1,4 +1,4 @@
-import type L from "leaflet";
+import L from "leaflet";
 import type { FeatureFlagProvider } from "../feature-flags";
 import type { LocationTracker, OrientationTracker } from "../location";
 
@@ -160,24 +160,7 @@ export class MapMovementController {
     };
 
     private distanceMeters = (a: LatLngTuple, b: LatLngTuple): number => {
-        const earthRadiusMeters = 6371000;
-        const toRadians = Math.PI / 180;
-
-        const [latitudeA, longitudeA] = a;
-        const [latitudeB, longitudeB] = b;
-
-        const latitudeDelta = (latitudeB - latitudeA) * toRadians;
-        const longitudeDelta = (longitudeB - longitudeA) * toRadians;
-        const latitudeARadians = latitudeA * toRadians;
-        const latitudeBRadians = latitudeB * toRadians;
-
-        const h =
-            Math.sin(latitudeDelta / 2) ** 2 +
-            Math.cos(latitudeARadians) *
-                Math.cos(latitudeBRadians) *
-                Math.sin(longitudeDelta / 2) ** 2;
-
-        return 2 * earthRadiusMeters * Math.atan2(Math.sqrt(h), Math.sqrt(1 - h));
+        return L.latLng(a[0], a[1]).distanceTo(L.latLng(b[0], b[1]));
     };
 
     private map: L.Map;
