@@ -1,7 +1,6 @@
 import type L from "leaflet";
 import type { FeatureFlagProvider } from "../feature-flags";
 import type { LocationTracker, OrientationTracker } from "../location";
-import { rotateMap } from "./rotate-map";
 
 type MapMovementControllerParams = {
     map: L.Map;
@@ -45,18 +44,26 @@ export class MapMovementController {
             this.unsubscribeLocationFollow = this.locationTracker.addListener(
                 ({ latitude, longitude }) => {
                     // TODO: only if the location is within the bounds -- or should that happen higher up?
-                    this.map.setView([latitude, longitude], this.map.getZoom(), {
-                        animate: true,
-                    });
+                    this.map.setView(
+                        [latitude, longitude],
+                        this.map.getZoom(),
+                        {
+                            animate: true,
+                        },
+                    );
                 },
             );
         }
 
         if (!this.unsubscribeRotation) {
-            this.unsubscribeRotation = rotateMap({
-                orientationTracker: this.orientationTracker,
-                setBearing: (bearing) => this.map.setBearing(bearing),
-            });
+            this.unsubscribeRotation = this.orientationTracker.addListener(
+                ({ heading }) => {
+                    // Invert for map rotation:
+                    // when user turns left, map rotates clockwise.
+                    const corrected = (360 - heading) % 360;
+                    this.map.setBearing(corrected);
+                },
+            );
         }
     };
 
