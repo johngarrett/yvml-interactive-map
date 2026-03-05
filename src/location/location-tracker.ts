@@ -1,6 +1,7 @@
 import { debug, info } from "../utils";
 import type { LocationPoint } from "./types";
 import { Observable } from "../observable";
+import { getConfig } from "../config";
 
 export class LocationTracker extends Observable<LocationPoint> {
     /**
@@ -62,6 +63,18 @@ export class LocationTracker extends Observable<LocationPoint> {
 
     private handlePosition = (position: GeolocationPosition) => {
         const { latitude, longitude, accuracy } = position.coords;
+        const bounds = getConfig().getBounds();
+        if (bounds && !bounds.contains([latitude, longitude])) {
+            info(
+                "[LocationTracker] location outside bounds, stopping tracking",
+                {
+                    latitude,
+                    longitude,
+                },
+            );
+            this.stop();
+            return;
+        }
 
         this.notify({
             latitude,
