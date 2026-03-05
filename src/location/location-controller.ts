@@ -87,6 +87,10 @@ export class LocationController {
         this.updateOrientationCone();
     };
 
+    /**
+     * Creates or updates the directional cone once both location and heading
+     * are available.
+     */
     private updateOrientationCone = (): void => {
         if (!this.latestLocation || this.latestHeading === undefined) {
             return;
@@ -115,6 +119,9 @@ export class LocationController {
         this.orientationCone.setLatLngs(points);
     };
 
+    /**
+     * Builds a sector polygon centered on the current location.
+     */
     private buildConePolygon = ({
         center,
         heading,
@@ -132,7 +139,8 @@ export class LocationController {
         const points: Array<LatLng> = [center];
 
         for (let segment = 0; segment <= arcSegments; segment += 1) {
-            const bearing = startBearing + (spreadDegrees * segment) / arcSegments;
+            const bearing =
+                startBearing + (spreadDegrees * segment) / arcSegments;
             points.push(
                 this.destinationPoint({
                     center,
@@ -146,6 +154,12 @@ export class LocationController {
         return points;
     };
 
+    /**
+     * Computes a destination coordinate from a center point, bearing, and
+     * distance using spherical Earth geometry.
+     *
+     * this is used for drawing the cone around the user's location
+     */
     private destinationPoint = ({
         center,
         bearingDegrees,
@@ -166,7 +180,9 @@ export class LocationController {
 
         const nextLatitude = Math.asin(
             Math.sin(latitude) * Math.cos(angularDistance) +
-                Math.cos(latitude) * Math.sin(angularDistance) * Math.cos(bearing),
+                Math.cos(latitude) *
+                    Math.sin(angularDistance) *
+                    Math.cos(bearing),
         );
 
         const nextLongitude =
@@ -198,7 +214,7 @@ export class LocationController {
         if (this.orientationCone) {
             this.orientationCone.redraw();
         }
-        // this could be very expensive
+        // TODO: this could be very expensive
         this.pathLine.redraw();
     };
 

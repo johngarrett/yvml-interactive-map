@@ -115,6 +115,10 @@ export class OrientationTracker extends Observable<OrientationData> {
         }
     };
 
+    /**
+     * Normalizes a raw sensor reading and updates the smoothed heading target.
+     * Small changes are ignored to suppress compass jitter.
+     */
     private handleRawHeading = (rawHeading: number): void => {
         const normalized = OrientationTracker.normalizeHeading(rawHeading);
 
@@ -130,6 +134,9 @@ export class OrientationTracker extends Observable<OrientationData> {
             normalized,
         );
 
+        /**
+         * only animate if its a big enough delta
+         */
         if (Math.abs(delta) < 5) {
             return;
         }
@@ -141,8 +148,15 @@ export class OrientationTracker extends Observable<OrientationData> {
         }
     };
 
+    /**
+     * Animates the current heading toward the latest target heading and emits
+     * intermediate values for smooth map/cone rotation.
+     */
     private animate = (): void => {
-        if (this.currentHeading === undefined || this.targetHeading === undefined) {
+        if (
+            this.currentHeading === undefined ||
+            this.targetHeading === undefined
+        ) {
             this.animationFrame = undefined;
             return;
         }
@@ -167,10 +181,17 @@ export class OrientationTracker extends Observable<OrientationData> {
         this.animationFrame = requestAnimationFrame(this.animate);
     };
 
+    /**
+     * Wraps any heading value into [0, 360).
+     */
     private static normalizeHeading = (heading: number): number => {
         return ((heading % 360) + 360) % 360;
     };
 
+    /**
+     * Returns the smallest signed angular difference from `from` to `to`.
+     * Result is in [-180, 180).
+     */
     private static shortestDelta = (from: number, to: number): number => {
         return ((to - from + 540) % 360) - 180;
     };
