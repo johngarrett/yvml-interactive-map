@@ -2,15 +2,7 @@ import { debug, info } from "../utils";
 import type { LocationPoint } from "./types";
 import { Observable } from "../observable";
 import { getConfig } from "../config";
-import { LocationSmoother } from "./location-smoother";
 
-/**
- * Produces a single, stabilized location stream for all consumers.
- *
- * Raw geolocation fixes are validated, then either:
- * - emitted immediately (first fix / large discontinuity), or
- * - interpolated with an RAF-based exponential smoothing loop.
- */
 export class LocationTracker extends Observable<LocationPoint> {
     /**
      * Initialize position tracker and EventListener
@@ -18,17 +10,14 @@ export class LocationTracker extends Observable<LocationPoint> {
     constructor() {
         // TODO: move this out
         super();
-        this.smoother = new LocationSmoother({
-            tauMs: this.tauMs,
-            maxFrameDeltaMs: this.maxFrameDeltaMs,
-            snapDistanceMeters: this.snapDistanceMeters,
-            largeJumpMeters: this.largeJumpMeters,
-        });
 
         document.addEventListener(
             "visibilitychange",
             this.handleVisibilityChange,
         );
+
+        // Initialize map elements
+        // TODO: map elements in this class feels like tight coupling
     }
 
     /**
@@ -39,6 +28,11 @@ export class LocationTracker extends Observable<LocationPoint> {
             return;
         }
 
+        // TODO: call getPosition and return a boolean here
+        // true: tracking began successfully
+        // false: it didnt (permission denied, out of bounds, bad accuracy)
+        //
+        //
         this.watchId = navigator.geolocation.watchPosition(
             this.handlePosition,
             this.handleError,
@@ -60,8 +54,6 @@ export class LocationTracker extends Observable<LocationPoint> {
             navigator.geolocation.clearWatch(this.watchId);
             this.watchId = undefined;
         }
-
-        this.smoother.reset();
     };
 
     private handleVisibilityChange = () => {
@@ -75,12 +67,33 @@ export class LocationTracker extends Observable<LocationPoint> {
     };
 
     private handlePosition = (position: GeolocationPosition) => {
-        if (!this.isPositionAllowed(position)) {
+        const { latitude, longitude, accuracy } = position.coords;
+        const bounds = getConfig().getBounds();
+        if (bounds && !bounds.contains([latitude, longitude])) {
+            info(
+                "[LocationTracker] location outside bounds, stopping tracking",
+                {
+                    latitude,
+                    longitude,
+                },
+            );
+            this.stop();
             return;
         }
 
-        const nextPoint = this.toLocationPoint(position);
-        this.smoother.ingest(nextPoint, this.notify);
+        if (accuracy > 10) {
+            info(
+                `[LocationTracker] accuracy above 10, not notifying: ${accuracy}`,
+            );
+            return;
+        } // TODO: getConfig().config.minAccuracy)
+
+        this.notify({
+            latitude,
+            longitude,
+            accuracy,
+            timestamp: Date.now(),
+        });
     };
 
     // TODO: notify of stopping
@@ -104,59 +117,5 @@ export class LocationTracker extends Observable<LocationPoint> {
         }
     };
 
-    /**
-     * Validates bounds and accuracy requirements for incoming geolocation fixes.
-     */
-    private isPositionAllowed = (position: GeolocationPosition): boolean => {
-        const { latitude, longitude, accuracy } = position.coords;
-        const bounds = getConfig().getBounds();
-        if (bounds && !bounds.contains([latitude, longitude])) {
-            info(
-                "[LocationTracker] location outside bounds, stopping tracking",
-                {
-                    latitude,
-                    longitude,
-                },
-            );
-            this.stop();
-            return false;
-        }
-
-        if (accuracy > this.maxAccuracyMeters) {
-            info(
-                `[LocationTracker] accuracy above ${this.maxAccuracyMeters}, not notifying: ${accuracy}`,
-            );
-            return false;
-        }
-
-        return true;
-    };
-
-    /**
-     * Converts browser geolocation payload to the app-level location event.
-     */
-    private toLocationPoint = (
-        position: GeolocationPosition,
-    ): LocationPoint => {
-        const { latitude, longitude, accuracy } = position.coords;
-        return {
-            latitude,
-            longitude,
-            accuracy,
-            timestamp: Date.now(),
-        };
-    };
-
     private watchId: number | undefined;
-    private smoother: LocationSmoother;
-    // Exponential smoothing time constant. Higher is smoother/slower.
-    private readonly tauMs = 1200;
-    // Caps frame delta used for smoothing to avoid large single-frame jumps.
-    private readonly maxFrameDeltaMs = 100;
-    // Stop smoothing when converged within this radius.
-    private readonly snapDistanceMeters = 0.5;
-    // Snap immediately for large discontinuities.
-    private readonly largeJumpMeters = 25;
-    // Ignore points above this reported accuracy.
-    private readonly maxAccuracyMeters = 10;
 }

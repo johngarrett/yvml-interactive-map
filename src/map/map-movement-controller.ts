@@ -48,9 +48,14 @@ export class MapMovementController {
         if (!this.unsubscribeLocationFollow) {
             this.unsubscribeLocationFollow = this.locationTracker.addListener(
                 ({ latitude, longitude }) => {
-                    this.map.panTo([latitude, longitude], {
-                        animate: false,
-                    });
+                    // TODO: only if the location is within the bounds -- or should that happen higher up?
+                    this.map.setView(
+                        [latitude, longitude],
+                        this.map.getZoom(),
+                        {
+                            animate: true,
+                        },
+                    );
                 },
             );
         }
