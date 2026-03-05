@@ -1,7 +1,7 @@
 import type { POI } from "../types";
 import L from "leaflet";
 import { debug, warn } from "../utils";
-import { getFeatureFlagProviderOrThrow } from "../feature-flags";
+import { getConfig } from "../config";
 import type { POITracker } from "./POI-tracker";
 
 type POIPolygonControllerParams = {
@@ -108,14 +108,23 @@ const poiToLayers = (poi: POI, poiTracker: POITracker) => {
 
 export class POIPolygonController {
     constructor({ POIs, poiTracker }: POIPolygonControllerParams) {
+        const configStore = getConfig();
         // TODO: attach listener
 
-        getFeatureFlagProviderOrThrow().addListener(({ key, value }) => {
-            debug(`[POIPolygonController] got an udate ${key}, ${value}`);
+        configStore.addListener((event) => {
+            if (event.key !== "features") {
+                return;
+            }
+
+            const { key, value: showPolygons } = event.value;
+            debug(
+                `[POIPolygonController] got an update ${key}, ${showPolygons}`,
+            );
             if (key !== "polygons") {
                 return;
             }
-            if (value === true) {
+
+            if (showPolygons === true) {
                 debug(`[POIPolygonController] showing layer`);
                 if (this.layer.getLayers().length === 1) {
                     warn(
@@ -134,8 +143,7 @@ export class POIPolygonController {
             }
         });
 
-        const showPolygons =
-            getFeatureFlagProviderOrThrow().get("polygons").value;
+        const showPolygons = configStore.getFeature("polygons").value;
 
         this.layer = L.layerGroup(
             showPolygons

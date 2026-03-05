@@ -1,6 +1,6 @@
-import type { FeatureFlagType } from "./types";
+import type { FeatureConfig } from "./types";
 
-export const deafaultFeatureFlags = {
+export const defaultFeatures = {
     polygons: {
         name: "polygons",
         description: "Enable polygon shapes around buildings",
@@ -17,4 +17,4 @@ export const deafaultFeatureFlags = {
             "Follow user location and rotate map by orientation (disable to keep map static while dot/cone still move)",
         value: true,
     },
-} as const satisfies Record<string, FeatureFlagType>;
+} as const satisfies Record<string, FeatureConfig>;
