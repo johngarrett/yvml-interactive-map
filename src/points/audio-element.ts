@@ -2,10 +2,6 @@ import { LocalStorageProvider } from "../storage";
 import type { POI } from "../types";
 import { debug, info } from "../utils";
 
-const getTimestampKey = (entry: POI) => {
-    return `${entry.id}-timestamp`;
-};
-
 type AudioEventName =
     | "ended"
     | "loadedmetadata"
@@ -13,138 +9,156 @@ type AudioEventName =
     | "play"
     | "timeupdate";
 
-type AudioElementController = {
-    configure: (entry: POI) => void;
-    play: () => Promise<void>;
-    pause: () => void;
-    togglePlayPause: () => Promise<void>;
-    seekBySeconds: (seconds: number) => void;
-    getCurrentTime: () => number;
-    getDuration: () => number;
-    isPaused: () => boolean;
-    saveCurrentTime: () => void;
-    on: (eventName: AudioEventName, listener: EventListener) => () => void;
-    teardown: () => void;
+const getTimestampKey = (poi: POI) => {
+    return `${poi.id}-timestamp`;
 };
 
-export const AudioElement = {
-    create({ element }: { element: HTMLAudioElement }): AudioElementController {
-        let activeEntry: POI | undefined;
+/**
+ * Wraps the backing HTMLAudioElement used by the POI popup.
+ *
+ * Responsibilities:
+ * - load and unload the active POI audio source
+ * - restore and persist playback position per POI
+ * - expose low-level playback and seeking methods
+ * - proxy media events for the UI controller layer
+ *
+ * Provenance:
+ * - this class and its surrounding custom-player integration were AI-generated
+ * - keep the behavior under review when changing popup audio UX or persistence
+ */
+export class AudioElement {
+    constructor(params: { mediaElement: HTMLAudioElement }) {
+        this.mediaElement = params.mediaElement;
+    }
 
-        const saveCurrentTime = () => {
-            if (!activeEntry) {
-                return;
-            }
+    configure(poi: POI) {
+        if (this.activePoi?.id !== poi.id) {
+            this.saveCurrentTime();
+        }
 
-            LocalStorageProvider.set(
-                getTimestampKey(activeEntry),
-                JSON.stringify(element.currentTime),
+        this.activePoi = poi;
+        this.mediaElement.pause();
+
+        const timestampKey = getTimestampKey(poi);
+        const savedTime = LocalStorageProvider.has(timestampKey)
+            ? Number(JSON.parse(LocalStorageProvider.getOrThrow(timestampKey)))
+            : 0;
+
+        if (!LocalStorageProvider.has(timestampKey)) {
+            debug("AudioElement: no timestampKey found, will start at 0");
+        }
+
+        this.mediaElement.src = `${import.meta.env.BASE_URL}audio/${poi.audioName}`;
+        this.mediaElement.load();
+
+        const applyResumePosition = () => {
+            this.mediaElement.currentTime = savedTime;
+            this.mediaElement.removeEventListener(
+                "loadedmetadata",
+                applyResumePosition,
             );
         };
 
-        const configure = (entry: POI) => {
-            if (activeEntry?.id !== entry.id) {
-                saveCurrentTime();
-            }
+        this.mediaElement.addEventListener(
+            "loadedmetadata",
+            applyResumePosition,
+        );
+    }
 
-            activeEntry = entry;
-            element.pause();
+    async play() {
+        await this.mediaElement.play();
+    }
 
-            const timestampKey = getTimestampKey(entry);
-            const savedTime = LocalStorageProvider.has(timestampKey)
-                ? Number(
-                      JSON.parse(
-                          LocalStorageProvider.getOrThrow(timestampKey),
-                      ),
-                  )
-                : 0;
+    pause() {
+        this.mediaElement.pause();
+    }
 
-            if (!LocalStorageProvider.has(timestampKey)) {
-                debug("AudioElement: no timestampKey found, will start at 0");
-            }
+    async togglePlayPause() {
+        if (this.mediaElement.paused) {
+            await this.mediaElement.play();
+            return;
+        }
 
-            element.src = `${import.meta.env.BASE_URL}audio/${entry.audioName}`;
-            element.load();
+        this.mediaElement.pause();
+    }
 
-            const applyResumePosition = () => {
-                element.currentTime = savedTime;
-                element.removeEventListener(
-                    "loadedmetadata",
-                    applyResumePosition,
+    seekBySeconds(seconds: number) {
+        if (!Number.isFinite(this.mediaElement.duration)) {
+            if (seconds < 0) {
+                this.mediaElement.currentTime = Math.max(
+                    this.mediaElement.currentTime + seconds,
+                    0,
                 );
-            };
-
-            element.addEventListener("loadedmetadata", applyResumePosition);
-        };
-
-        const teardown = () => {
-            if (!activeEntry) {
-                return;
             }
+            return;
+        }
 
-            info(`AudioElement: teardown on ${activeEntry.title}`);
+        this.mediaElement.currentTime = Math.min(
+            Math.max(this.mediaElement.currentTime + seconds, 0),
+            this.mediaElement.duration,
+        );
+    }
 
-            if (!element.paused) {
-                debug("AudioElement: audio wasn't paused, calling pause");
-                element.pause();
-            }
+    getCurrentTime() {
+        return this.mediaElement.currentTime;
+    }
 
-            saveCurrentTime();
-            element.removeAttribute("src");
-            element.load();
-            activeEntry = undefined;
+    getDuration() {
+        return this.mediaElement.duration;
+    }
+
+    /** Returns whether the backing media element is currently paused. */
+    isPaused() {
+        return this.mediaElement.paused;
+    }
+
+    /** Persists the current playback time for the active POI, if one exists. */
+    saveCurrentTime() {
+        if (!this.activePoi) {
+            return;
+        }
+
+        LocalStorageProvider.set(
+            getTimestampKey(this.activePoi),
+            JSON.stringify(this.mediaElement.currentTime),
+        );
+    }
+
+    /**
+     * Registers a media event listener and returns a cleanup function that
+     * removes the exact listener later.
+     */
+    on(eventName: AudioEventName, listener: EventListener) {
+        this.mediaElement.addEventListener(eventName, listener);
+
+        return () => {
+            this.mediaElement.removeEventListener(eventName, listener);
         };
+    }
 
-        return {
-            configure,
-            async play() {
-                await element.play();
-            },
-            pause() {
-                element.pause();
-            },
-            async togglePlayPause() {
-                if (element.paused) {
-                    await element.play();
-                    return;
-                }
+    /**
+     * Saves the current timestamp, pauses playback, and clears the media source
+     * so the next POI starts from a clean element state.
+     */
+    teardown() {
+        if (!this.activePoi) {
+            return;
+        }
 
-                element.pause();
-            },
-            seekBySeconds(seconds: number) {
-                if (!Number.isFinite(element.duration)) {
-                    if (seconds < 0) {
-                        element.currentTime = Math.max(
-                            element.currentTime + seconds,
-                            0,
-                        );
-                    }
-                    return;
-                }
+        info(`AudioElement: teardown on ${this.activePoi.title}`);
 
-                element.currentTime = Math.min(
-                    Math.max(element.currentTime + seconds, 0),
-                    element.duration,
-                );
-            },
-            getCurrentTime() {
-                return element.currentTime;
-            },
-            getDuration() {
-                return element.duration;
-            },
-            isPaused() {
-                return element.paused;
-            },
-            saveCurrentTime,
-            on(eventName, listener) {
-                element.addEventListener(eventName, listener);
+        if (!this.mediaElement.paused) {
+            debug("AudioElement: audio wasn't paused, calling pause");
+            this.mediaElement.pause();
+        }
 
-                return () => {
-                    element.removeEventListener(eventName, listener);
-                };
-            },
-            teardown,
-        };
-    },
-};
+        this.saveCurrentTime();
+        this.mediaElement.removeAttribute("src");
+        this.mediaElement.load();
+        this.activePoi = undefined;
+    }
+
+    private activePoi?: POI;
+
+    private mediaElement: HTMLAudioElement;
+}

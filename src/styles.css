@@ -243,13 +243,23 @@ body {
   background: #f3f3f3;
 }
 
-#poi-popup-audio-status {
+#poi-popup-audio-progress-track {
   flex: 1;
   min-width: 0;
-  color: #333;
-  white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  border: 1px solid rgba(143, 143, 143, 0.8);
+  pointer-events: none;
+}
+
+#poi-popup-audio-progress {
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: #111;
+  transition: width 120ms linear;
 }
 
 #poi-popup-audio-time {
@@ -258,7 +268,7 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-#poi-popup-audio-element {
+#poi-popup-audio-media {
   display: none;
 }
 
@@ -267,7 +277,7 @@ body {
     flex-wrap: wrap;
   }
 
-  #poi-popup-audio-status {
+  #poi-popup-audio-progress-track {
     order: 4;
     flex-basis: calc(100% - 60px);
   }

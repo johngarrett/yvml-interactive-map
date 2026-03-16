@@ -16,45 +16,65 @@ const formatRemainingTime = (currentTime: number, duration: number) => {
     return `-${minutes}:${seconds.toString().padStart(2, "0")}`;
 };
 
+/**
+ * Owns the custom POI audio player UI.
+ *
+ * Responsibilities:
+ * - find the player-specific DOM nodes inside the popup
+ * - bind button interactions for play/pause and +/-15 second seeking
+ * - translate media events into UI updates for the progress bar and time left
+ * - delegate raw media lifecycle work to AudioElement
+ *
+ * Provenance:
+ * - this controller and its companion UI were AI-generated
+ * - treat it as generated code that should be reviewed when modifying behavior
+ */
 export class AudioController {
     constructor() {
         this.elements = {
-            audioElement: getElementOrThrow({ id: "poi-popup-audio-element" }),
+            mediaElement: getElementOrThrow({ id: "poi-popup-audio-media" }),
             container: getElementOrThrow({ id: "poi-popup-audio" }),
             backButton: getElementOrThrow({ id: "poi-popup-audio-back" }),
             playPauseButton: getElementOrThrow({ id: "poi-popup-audio-toggle" }),
             forwardButton: getElementOrThrow({ id: "poi-popup-audio-forward" }),
-            statusElement: getElementOrThrow({ id: "poi-popup-audio-status" }),
+            progressTrackElement: getElementOrThrow({
+                id: "poi-popup-audio-progress-track",
+            }),
+            progressElement: getElementOrThrow({
+                id: "poi-popup-audio-progress",
+            }),
             timeRemainingElement: getElementOrThrow({
                 id: "poi-popup-audio-time",
             }),
         };
-        this.audio = AudioElement.create({ element: this.elements.audioElement });
+        this.audioPlayback = new AudioElement({
+            mediaElement: this.elements.mediaElement,
+        });
     }
 
     setup({ poi }: { poi: POI }) {
         this.teardownUi();
 
-        this.audio.configure(poi);
+        this.audioPlayback.configure(poi);
         this.elements.container.classList.remove("hidden");
         this.renderLoadingState();
 
         const backClickListener = () => {
-            this.audio.seekBySeconds(-SEEK_INTERVAL_SECONDS);
+            this.audioPlayback.seekBySeconds(-SEEK_INTERVAL_SECONDS);
             this.renderTime();
-            this.renderStatus();
+            this.renderPlaybackState();
         };
 
         const playPauseClickListener = () => {
-            void this.audio.togglePlayPause().catch((error: unknown) => {
+            void this.audioPlayback.togglePlayPause().catch((error: unknown) => {
                 debug(`[AudioController] togglePlayPause failed: ${error}`);
             });
         };
 
         const forwardClickListener = () => {
-            this.audio.seekBySeconds(SEEK_INTERVAL_SECONDS);
+            this.audioPlayback.seekBySeconds(SEEK_INTERVAL_SECONDS);
             this.renderTime();
-            this.renderStatus();
+            this.renderPlaybackState();
         };
 
         this.elements.backButton.addEventListener("click", backClickListener);
@@ -83,40 +103,32 @@ export class AudioController {
         });
 
         this.cleanups.push(
-            this.audio.on("loadedmetadata", () => {
-                this.status = "ready";
-                this.renderStatus();
+            this.audioPlayback.on("loadedmetadata", () => {
+                this.renderPlaybackState();
                 this.renderTime();
             }),
         );
         this.cleanups.push(
-            this.audio.on("timeupdate", () => {
+            this.audioPlayback.on("timeupdate", () => {
+                this.renderTime();
+                this.renderProgress();
+            }),
+        );
+        this.cleanups.push(
+            this.audioPlayback.on("play", () => {
+                this.renderPlaybackState();
+            }),
+        );
+        this.cleanups.push(
+            this.audioPlayback.on("pause", () => {
+                this.audioPlayback.saveCurrentTime();
+                this.renderPlaybackState();
                 this.renderTime();
             }),
         );
         this.cleanups.push(
-            this.audio.on("play", () => {
-                this.status = "playing";
-                this.renderStatus();
-            }),
-        );
-        this.cleanups.push(
-            this.audio.on("pause", () => {
-                const duration = this.audio.getDuration();
-                const currentTime = this.audio.getCurrentTime();
-                this.status =
-                    Number.isFinite(duration) && currentTime >= duration
-                        ? "finished"
-                        : "paused";
-                this.audio.saveCurrentTime();
-                this.renderStatus();
-                this.renderTime();
-            }),
-        );
-        this.cleanups.push(
-            this.audio.on("ended", () => {
-                this.status = "finished";
-                this.renderStatus();
+            this.audioPlayback.on("ended", () => {
+                this.renderPlaybackState();
                 this.renderTime();
             }),
         );
@@ -124,61 +136,73 @@ export class AudioController {
 
     teardown() {
         this.teardownUi();
-        this.audio.teardown();
+        this.audioPlayback.teardown();
         this.elements.container.classList.add("hidden");
-        this.status = "loading";
         this.renderLoadingState();
     }
 
-    private audio: ReturnType<typeof AudioElement.create>;
+    private audioPlayback: AudioElement;
 
     private cleanups: Array<() => void> = [];
 
     private elements: {
-        audioElement: HTMLAudioElement;
+        mediaElement: HTMLAudioElement;
         container: HTMLElement;
         backButton: HTMLButtonElement;
         playPauseButton: HTMLButtonElement;
         forwardButton: HTMLButtonElement;
-        statusElement: HTMLElement;
+        progressTrackElement: HTMLElement;
+        progressElement: HTMLElement;
         timeRemainingElement: HTMLElement;
     };
 
-    private status: "finished" | "loading" | "paused" | "playing" | "ready" =
-        "loading";
-
+    /** Resets the visible player UI before metadata is available. */
     private renderLoadingState() {
         this.elements.playPauseButton.textContent = "▶";
         this.elements.playPauseButton.setAttribute("aria-label", "Play audio");
-        this.elements.statusElement.textContent = "Loading...";
         this.elements.timeRemainingElement.textContent = "--:--";
+        this.elements.progressElement.style.width = "0%";
     }
 
-    private renderStatus() {
-        this.elements.playPauseButton.textContent = this.audio.isPaused()
+    /** Syncs the play/pause button state and progress bar with the media state. */
+    private renderPlaybackState() {
+        this.elements.playPauseButton.textContent = this.audioPlayback.isPaused()
             ? "▶"
             : "⏸";
         this.elements.playPauseButton.setAttribute(
             "aria-label",
-            this.audio.isPaused() ? "Play audio" : "Pause audio",
+            this.audioPlayback.isPaused() ? "Play audio" : "Pause audio",
         );
-
-        this.elements.statusElement.textContent = {
-            finished: "Finished",
-            loading: "Loading...",
-            paused: "Paused",
-            playing: "Now playing",
-            ready: "Ready to play",
-        }[this.status];
+        this.renderProgress();
     }
 
+    /** Formats and renders the time remaining label from the current media time. */
     private renderTime() {
         this.elements.timeRemainingElement.textContent = formatRemainingTime(
-            this.audio.getCurrentTime(),
-            this.audio.getDuration(),
+            this.audioPlayback.getCurrentTime(),
+            this.audioPlayback.getDuration(),
         );
     }
 
+    /** Fills the passive progress bar based on currentTime / duration. */
+    private renderProgress() {
+        const duration = this.audioPlayback.getDuration();
+        const currentTime = this.audioPlayback.getCurrentTime();
+
+        if (!Number.isFinite(duration) || duration <= 0) {
+            this.elements.progressElement.style.width = "0%";
+            return;
+        }
+
+        const progressPercent = Math.min(
+            Math.max((currentTime / duration) * 100, 0),
+            100,
+        );
+
+        this.elements.progressElement.style.width = `${progressPercent}%`;
+    }
+
+    /** Runs and clears every stored event/listener cleanup callback. */
     private teardownUi() {
         for (const cleanup of this.cleanups) {
             cleanup();
