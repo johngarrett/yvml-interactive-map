@@ -63,7 +63,16 @@
         </button>
       </div>
       <img id="poi-popup-image" />
-      <audio id="poi-popup-audio-element" controls preload="none"></audio>
+      <div id="poi-popup-audio" class="hidden">
+        <div id="poi-popup-audio-player">
+          <button id="poi-popup-audio-back" type="button" aria-label="Go back 15 seconds">⟲ 15</button>
+          <button id="poi-popup-audio-toggle" type="button" aria-label="Play audio">▶</button>
+          <button id="poi-popup-audio-forward" type="button" aria-label="Go forward 15 seconds">15 ⟳</button>
+          <div id="poi-popup-audio-status">Loading...</div>
+          <div id="poi-popup-audio-time">--:--</div>
+        </div>
+        <audio id="poi-popup-audio-element" preload="none"></audio>
+      </div>
     </div>
   </div>
   <!---- END POI Popup -->

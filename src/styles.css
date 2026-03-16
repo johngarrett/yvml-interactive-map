@@ -214,13 +214,66 @@ body {
   border: #b7b7b7;
   border-style: solid;
   border-radius: 12px;
-  padding-left: 5px;
-  padding-right: 5px;
+  padding-left: 8px;
+  padding-right: 8px;
   padding-top: 10px;
   padding-bottom: 10px;
   border-width: 2px;
+  margin-top: 12px;
+}
+
+#poi-popup-audio-player {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#poi-popup-audio-player button {
+  border: 1px solid #8f8f8f;
+  border-radius: 999px;
+  background: #fff;
+  color: #111;
+  min-height: 38px;
+  padding: 0 12px;
+  font: inherit;
+  cursor: pointer;
+}
+
+#poi-popup-audio-player button:hover {
+  background: #f3f3f3;
+}
+
+#poi-popup-audio-status {
+  flex: 1;
+  min-width: 0;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#poi-popup-audio-time {
+  min-width: 52px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 #poi-popup-audio-element {
-  width: 100%;
+  display: none;
+}
+
+@media (max-width: 640px) {
+  #poi-popup-audio-player {
+    flex-wrap: wrap;
+  }
+
+  #poi-popup-audio-status {
+    order: 4;
+    flex-basis: calc(100% - 60px);
+  }
+
+  #poi-popup-audio-time {
+    order: 5;
+    margin-left: auto;
+  }
 }

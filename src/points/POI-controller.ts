@@ -2,7 +2,7 @@ import { markerIdForPOI } from "../map/components/poi-marker";
 import { POITracker } from "../points";
 import type { POI } from "../types";
 import { debug, getElementOrThrow, info } from "../utils";
-import { AudioElement } from "./audio-element";
+import { AudioController } from "./audio-controller";
 
 export class POIController {
     constructor(params: { poiTracker: POITracker }) {
@@ -15,11 +15,11 @@ export class POIController {
         );
 
         this.elements = {
-            audio: getElementOrThrow({ id: "poi-popup-audio-element" }),
             container: getElementOrThrow({ id: "poi-popup" }),
             image: getElementOrThrow({ id: "poi-popup-image" }),
             title: getElementOrThrow({ id: "poi-popup-title" }),
         };
+        this.audioController = new AudioController();
 
         params.poiTracker.addListener((activePOI) => {
             debug(
@@ -42,13 +42,7 @@ export class POIController {
                 `[POIController] switching from ${this.active.poi?.id} to ${poi.id}`,
             );
 
-            if (this.active.pauseEventListener) {
-                AudioElement.teardown({
-                    element: this.elements.audio,
-                    entry: this.active.poi,
-                    pauseListener: this.active.pauseEventListener,
-                });
-            }
+            this.audioController.teardown();
         }
 
         this.active = { poi: poi };
@@ -70,17 +64,10 @@ export class POIController {
         this.elements.image.hidden = !poi.imageName;
 
         if (poi.audioName) {
-            this.active.pauseEventListener = AudioElement.setup({
-                entry: poi,
-                element: this.elements.audio,
-                pauseCallback: () => {
-                    // TODO: pause and play callbacks for decorating the POI
-                    debug("[POIController] pauseCallback");
-                },
-            });
+            this.audioController.setup({ poi });
+        } else {
+            this.audioController.teardown();
         }
-
-        this.elements.audio.hidden = !poi.audioName;
 
         this.elements.container.classList.remove("hidden");
         this.hidden = false;
@@ -91,21 +78,12 @@ export class POIController {
         this.elements.container.classList.add("hidden");
         this.hidden = true;
 
-        if (this.active?.pauseEventListener) {
-            AudioElement.teardown({
-                element: this.elements.audio,
-                entry: this.active.poi,
-                pauseListener: this.active.pauseEventListener,
-            });
-        } else {
-            debug("no active listener, not tearing down audio");
-        }
+        this.audioController.teardown();
     }
 
     public hidden: boolean = true;
 
     private elements: {
-        audio: HTMLAudioElement;
         container: HTMLElement;
         image: HTMLImageElement;
         title: HTMLElement;
@@ -113,14 +91,7 @@ export class POIController {
 
     private active?: {
         poi: POI;
-        pauseEventListener?: () => void;
-
-        /**
-         * TODO: listeners: { pause, play }
-         *
-         * on play, we set the outline of the POI
-         *
-         * on pause, we remove that outline or change it's color
-         */
     };
+
+    private audioController: AudioController;
 }

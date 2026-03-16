@@ -6,93 +6,145 @@ const getTimestampKey = (entry: POI) => {
     return `${entry.id}-timestamp`;
 };
 
+type AudioEventName =
+    | "ended"
+    | "loadedmetadata"
+    | "pause"
+    | "play"
+    | "timeupdate";
+
+type AudioElementController = {
+    configure: (entry: POI) => void;
+    play: () => Promise<void>;
+    pause: () => void;
+    togglePlayPause: () => Promise<void>;
+    seekBySeconds: (seconds: number) => void;
+    getCurrentTime: () => number;
+    getDuration: () => number;
+    isPaused: () => boolean;
+    saveCurrentTime: () => void;
+    on: (eventName: AudioEventName, listener: EventListener) => () => void;
+    teardown: () => void;
+};
+
 export const AudioElement = {
-    /**
-     * setup HTMLAudioElement
-     *
-     * 1. pull timestamp from local storage
-     * 2. load media
-     * 3. add event listener
-     */
-    setup: ({
-        entry,
-        element,
-        pauseCallback,
-    }: {
-        entry: POI;
-        element: HTMLAudioElement;
-        pauseCallback: () => void;
-    }) => {
-        element.pause();
+    create({ element }: { element: HTMLAudioElement }): AudioElementController {
+        let activeEntry: POI | undefined;
 
-        const timestampKey = getTimestampKey(entry);
-        const savedTime = LocalStorageProvider.has(timestampKey)
-            ? Number(JSON.parse(LocalStorageProvider.getOrThrow(timestampKey)))
-            : 0;
+        const saveCurrentTime = () => {
+            if (!activeEntry) {
+                return;
+            }
 
-        if (!LocalStorageProvider.has(timestampKey)) {
-            debug("AudioElement: no timestampKey found, will start at 0");
-        }
-
-        element.src = `${import.meta.env.BASE_URL}audio/${entry.audioName}`;
-        element.load();
-
-        /*
-         * Safari (and WebKit) ignores currentTime set before src/load(); set it
-         * after metadata is loaded so resume works correctly.
-         */
-        const applyResumePosition = () => {
-            element.currentTime = savedTime;
-            element.removeEventListener("loadedmetadata", applyResumePosition);
-        };
-        element.addEventListener("loadedmetadata", applyResumePosition);
-
-        /*
-         * save audio timestamp whenever the audio is paused
-         */
-        // TODO: maybe break this out into a 'save' function and that will maintian the lifecycle
-        const pauseEventListener = () => {
-            debug(`AudioElement: pause selected on ${entry.id}`);
             LocalStorageProvider.set(
-                timestampKey,
+                getTimestampKey(activeEntry),
                 JSON.stringify(element.currentTime),
             );
-            pauseCallback();
         };
 
-        element.addEventListener("pause", pauseEventListener);
+        const configure = (entry: POI) => {
+            if (activeEntry?.id !== entry.id) {
+                saveCurrentTime();
+            }
 
-        return pauseEventListener;
-    },
-
-    /**
-     * teardown HTMLAudioElement
-     *
-     * 1. save timestamp to local storage
-     * 2. pause media
-     * 3. remove event listener
-     */
-    teardown: ({
-        element,
-        pauseListener: listener,
-        entry,
-    }: {
-        element: HTMLAudioElement;
-        pauseListener: () => void;
-        entry: POI;
-    }) => {
-        info(`AudioElement: teardown on ${entry.title}`);
-
-        if (!element.paused) {
-            debug("AudioElement: audio wasn't paused, calling pause");
+            activeEntry = entry;
             element.pause();
-        }
 
-        LocalStorageProvider.set(
-            getTimestampKey(entry),
-            JSON.stringify(element.currentTime),
-        );
+            const timestampKey = getTimestampKey(entry);
+            const savedTime = LocalStorageProvider.has(timestampKey)
+                ? Number(
+                      JSON.parse(
+                          LocalStorageProvider.getOrThrow(timestampKey),
+                      ),
+                  )
+                : 0;
 
-        element.removeEventListener("pause", listener);
+            if (!LocalStorageProvider.has(timestampKey)) {
+                debug("AudioElement: no timestampKey found, will start at 0");
+            }
+
+            element.src = `${import.meta.env.BASE_URL}audio/${entry.audioName}`;
+            element.load();
+
+            const applyResumePosition = () => {
+                element.currentTime = savedTime;
+                element.removeEventListener(
+                    "loadedmetadata",
+                    applyResumePosition,
+                );
+            };
+
+            element.addEventListener("loadedmetadata", applyResumePosition);
+        };
+
+        const teardown = () => {
+            if (!activeEntry) {
+                return;
+            }
+
+            info(`AudioElement: teardown on ${activeEntry.title}`);
+
+            if (!element.paused) {
+                debug("AudioElement: audio wasn't paused, calling pause");
+                element.pause();
+            }
+
+            saveCurrentTime();
+            element.removeAttribute("src");
+            element.load();
+            activeEntry = undefined;
+        };
+
+        return {
+            configure,
+            async play() {
+                await element.play();
+            },
+            pause() {
+                element.pause();
+            },
+            async togglePlayPause() {
+                if (element.paused) {
+                    await element.play();
+                    return;
+                }
+
+                element.pause();
+            },
+            seekBySeconds(seconds: number) {
+                if (!Number.isFinite(element.duration)) {
+                    if (seconds < 0) {
+                        element.currentTime = Math.max(
+                            element.currentTime + seconds,
+                            0,
+                        );
+                    }
+                    return;
+                }
+
+                element.currentTime = Math.min(
+                    Math.max(element.currentTime + seconds, 0),
+                    element.duration,
+                );
+            },
+            getCurrentTime() {
+                return element.currentTime;
+            },
+            getDuration() {
+                return element.duration;
+            },
+            isPaused() {
+                return element.paused;
+            },
+            saveCurrentTime,
+            on(eventName, listener) {
+                element.addEventListener(eventName, listener);
+
+                return () => {
+                    element.removeEventListener(eventName, listener);
+                };
+            },
+            teardown,
+        };
     },
 };
