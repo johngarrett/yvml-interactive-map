@@ -3,9 +3,20 @@ import type { LocationPoint } from "./types";
 import { Observable } from "../observable";
 import { getConfig } from "../config";
 
+type StartResult =
+    | {
+          result: "success";
+          initialLocation: LocationPoint;
+      }
+    | {
+          result: "failure";
+          reason: "out-of-bounds" | "permission-denied" | "unknown";
+      };
+
+// TODO: locationPoit isn't enough to emit for observability
 export class LocationTracker extends Observable<LocationPoint> {
     /**
-     * Initialize position tracker and EventListener
+     * Initialize EventListener
      */
     constructor() {
         // TODO: move this out
@@ -15,15 +26,45 @@ export class LocationTracker extends Observable<LocationPoint> {
             "visibilitychange",
             this.handleVisibilityChange,
         );
-
-        // Initialize map elements
-        // TODO: map elements in this class feels like tight coupling
     }
 
+    // TODO: breaking out to help me think
+    public getInitialLocation = async (): StartResult => {
+        try {
+            // grab intiial location
+            const position = await new Promise<GeolocationPosition>(
+                (resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 2000,
+                    });
+                },
+            );
+        } catch (e) {
+            if (!(e instanceof GeolocationPositionError)) {
+            }
+        }
+    };
+
+    private isWithinBounds = ({
+        latitude,
+        longitude,
+    }: Pick<LocationPoint, "latitude" | "longitude">) => {
+        const bounds = getConfig().getBounds();
+        if (bounds && !bounds.contains([latitude, longitude])) {
+            info("[LocationTracker] location outside bounds", {
+                latitude,
+                longitude,
+            });
+            return false;
+        }
+        return true;
+    };
     /**
      * start tracking via navigator.geolocation
      */
-    public start = (): void => {
+    public start = async (): void => {
         if (this.watchId !== undefined) {
             return;
         }
@@ -68,8 +109,7 @@ export class LocationTracker extends Observable<LocationPoint> {
 
     private handlePosition = (position: GeolocationPosition) => {
         const { latitude, longitude, accuracy } = position.coords;
-        const bounds = getConfig().getBounds();
-        if (bounds && !bounds.contains([latitude, longitude])) {
+        if (!this.isWithinBounds(position.coords)) {
             info(
                 "[LocationTracker] location outside bounds, stopping tracking",
                 {
