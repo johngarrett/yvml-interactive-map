@@ -96,7 +96,10 @@ export class LocationTracker extends Observable<LocationPoint> {
 
             this.watchId = navigator.geolocation.watchPosition(
                 this.handlePosition,
-                this.handleError,
+                (error) => {
+                    const result = errorToResult(error);
+                    return result;
+                },
                 {
                     enableHighAccuracy: true,
                     timeout: 10000,
@@ -110,7 +113,9 @@ export class LocationTracker extends Observable<LocationPoint> {
                 initialLocation: initialLocation,
             };
         } catch (error) {
-            return errorToResult(error);
+            const result = errorToResult(error);
+            this.notify(result);
+            return result;
         }
     };
 
@@ -176,27 +181,6 @@ export class LocationTracker extends Observable<LocationPoint> {
             accuracy,
             timestamp: Date.now(),
         });
-    };
-
-    // TODO: notify of stopping
-    private handleError = (error: GeolocationPositionError) => {
-        switch (error.code) {
-            case GeolocationPositionError.PERMISSION_DENIED: {
-                info("permission denied", error);
-                break;
-            }
-            case GeolocationPositionError.POSITION_UNAVAILABLE: {
-                info("position unavailable", error);
-                break;
-            }
-            case GeolocationPositionError.TIMEOUT: {
-                info("timeout", error);
-                break;
-            }
-            default: {
-                info(error);
-            }
-        }
     };
 
     private watchId: number | undefined;
