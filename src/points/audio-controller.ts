@@ -77,6 +77,25 @@ export class AudioController {
             this.renderPlaybackState();
         };
 
+        const progressTrackClickListener = (event: MouseEvent) => {
+            const duration = this.audioPlayback.getDuration();
+            if (!Number.isFinite(duration) || duration <= 0) {
+                return;
+            }
+
+            const trackBounds =
+                this.elements.progressTrackElement.getBoundingClientRect();
+            const clickOffset = event.clientX - trackBounds.left;
+            const clickRatio = Math.min(
+                Math.max(clickOffset / trackBounds.width, 0),
+                1,
+            );
+
+            this.audioPlayback.setCurrentTime(duration * clickRatio);
+            this.renderTime();
+            this.renderPlaybackState();
+        };
+
         this.elements.backButton.addEventListener("click", backClickListener);
         this.elements.playPauseButton.addEventListener(
             "click",
@@ -85,6 +104,10 @@ export class AudioController {
         this.elements.forwardButton.addEventListener(
             "click",
             forwardClickListener,
+        );
+        this.elements.progressTrackElement.addEventListener(
+            "click",
+            progressTrackClickListener,
         );
 
         this.cleanups.push(() => {
@@ -99,6 +122,10 @@ export class AudioController {
             this.elements.forwardButton.removeEventListener(
                 "click",
                 forwardClickListener,
+            );
+            this.elements.progressTrackElement.removeEventListener(
+                "click",
+                progressTrackClickListener,
             );
         });
 
@@ -184,7 +211,7 @@ export class AudioController {
         );
     }
 
-    /** Fills the passive progress bar based on currentTime / duration. */
+    /** Fills the progress bar based on currentTime / duration. */
     private renderProgress() {
         const duration = this.audioPlayback.getDuration();
         const currentTime = this.audioPlayback.getCurrentTime();

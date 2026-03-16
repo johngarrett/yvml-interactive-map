@@ -99,6 +99,19 @@ export class AudioElement {
         );
     }
 
+    /** Seeks to an absolute playback time, clamped to the media duration. */
+    setCurrentTime(timeInSeconds: number) {
+        if (!Number.isFinite(this.mediaElement.duration)) {
+            this.mediaElement.currentTime = Math.max(timeInSeconds, 0);
+            return;
+        }
+
+        this.mediaElement.currentTime = Math.min(
+            Math.max(timeInSeconds, 0),
+            this.mediaElement.duration,
+        );
+    }
+
     getCurrentTime() {
         return this.mediaElement.currentTime;
     }
