@@ -88,18 +88,18 @@ export const POIs: Array<POI> = [
             [34.18183081096805, -116.41419415485214],
         ),
     },
-    {
-        title: "Concrete Fountain",
-        id: "fountain",
-        location: {
-            latitude: 34.1819,
-            longitude: -116.414152,
-        },
-        bounds: toBounds(
-            [34.181856031161424, -116.41416766231699],
-            [34.181919843046764, -116.4140393677009],
-        ),
-    },
+    //{
+    //    title: "Concrete Fountain",
+    //    id: "fountain",
+    //    location: {
+    //        latitude: 34.1819,
+    //        longitude: -116.414152,
+    //    },
+    //    bounds: toBounds(
+    //        [34.181856031161424, -116.41416766231699],
+    //        [34.181919843046764, -116.4140393677009],
+    //    ),
+    //},
     {
         title: "Lazy Eye Gallery",
         id: "gallery",

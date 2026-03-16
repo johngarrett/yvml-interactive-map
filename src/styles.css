@@ -87,6 +87,10 @@ body {
   flex: 1;
 }
 
+.leaflet-container:focus {
+  outline: none;
+}
+
 #console {
   height: 20%;
   min-height: 0;
