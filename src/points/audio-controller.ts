@@ -3,6 +3,8 @@ import { debug, getElementOrThrow } from "../utils";
 import { AudioElement } from "./audio-element";
 
 const SEEK_INTERVAL_SECONDS = 15;
+const PLAY_SYMBOL = "▶︎";
+const PAUSE_SYMBOL = "⏸︎";
 
 const formatRemainingTime = (currentTime: number, duration: number) => {
     if (!Number.isFinite(duration)) {
@@ -191,7 +193,7 @@ export class AudioController {
 
     /** Resets the visible player UI before metadata is available. */
     private renderLoadingState() {
-        this.elements.playPauseButton.textContent = "▶";
+        this.elements.playPauseButton.textContent = PLAY_SYMBOL;
         this.elements.playPauseButton.setAttribute("aria-label", "Play audio");
         this.elements.timeRemainingElement.textContent = "--:--";
         this.elements.progressElement.style.width = "0%";
@@ -200,8 +202,8 @@ export class AudioController {
     /** Syncs the play/pause button state and progress bar with the media state. */
     private renderPlaybackState() {
         this.elements.playPauseButton.textContent = this.audioPlayback.isPaused()
-            ? "▶"
-            : "⏸";
+            ? PLAY_SYMBOL
+            : PAUSE_SYMBOL;
         this.elements.playPauseButton.setAttribute(
             "aria-label",
             this.audioPlayback.isPaused() ? "Play audio" : "Pause audio",

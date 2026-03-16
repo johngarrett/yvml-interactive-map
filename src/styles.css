@@ -270,6 +270,8 @@ body {
   min-height: 38px;
   padding: 0 12px;
   font: inherit;
+  font-family: Futura, Helvetica, Arial, sans-serif;
+  font-variant-emoji: text;
   cursor: pointer;
 }
 
