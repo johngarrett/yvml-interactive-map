@@ -45,7 +45,6 @@ const errorToResult = (error: unknown): StartResult => {
     };
 };
 
-// TODO: locationPoit isn't enough to emit for observability
 export class LocationTracker extends Observable<LocationPoint> {
     /**
      * Initialize EventListener
@@ -60,8 +59,17 @@ export class LocationTracker extends Observable<LocationPoint> {
         );
     }
 
-    // TODO: breaking out to help me think
-    public getInitialLocation = async (): Promise<StartResult> => {
+    /**
+     * Start tracking via navigator.geolocation and return the initial location or an error.
+     */
+    public start = async (): Promise<StartResult> => {
+        if (this.watchId !== undefined) {
+            return {
+                status: "failure",
+                reason: "already-tracking",
+            };
+        }
+
         try {
             // grab intiial location
             const position = await new Promise<GeolocationPosition>(
@@ -86,6 +94,17 @@ export class LocationTracker extends Observable<LocationPoint> {
                 };
             }
 
+            this.watchId = navigator.geolocation.watchPosition(
+                this.handlePosition,
+                this.handleError,
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 2000, // TODO: see what this does
+                },
+            );
+
+            debug(`[LocationTracker] watch started: ${this.watchId}`);
             return {
                 status: "success",
                 initialLocation: initialLocation,
@@ -108,31 +127,6 @@ export class LocationTracker extends Observable<LocationPoint> {
             return false;
         }
         return true;
-    };
-    /**
-     * start tracking via navigator.geolocation
-     */
-    public start = async (): void => {
-        if (this.watchId !== undefined) {
-            return;
-        }
-
-        // TODO: call getPosition and return a boolean here
-        // true: tracking began successfully
-        // false: it didnt (permission denied, out of bounds, bad accuracy)
-        //
-        //
-        this.watchId = navigator.geolocation.watchPosition(
-            this.handlePosition,
-            this.handleError,
-            {
-                enableHighAccuracy: true,
-                timeout: 10000,
-                maximumAge: 2000, // TODO: see what this does
-            },
-        );
-
-        debug(`[LocationTracker] watch started: ${this.watchId}`);
     };
 
     /**
