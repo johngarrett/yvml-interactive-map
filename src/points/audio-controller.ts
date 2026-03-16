@@ -64,6 +64,7 @@ export class AudioController {
         this.teardownUi();
 
         this.audioPlayback.configure(poi);
+        this.updateMediaSessionMetadata(poi);
         this.elements.container.classList.remove("hidden");
         this.renderLoadingState();
 
@@ -172,6 +173,7 @@ export class AudioController {
     teardown() {
         this.teardownUi();
         this.audioPlayback.teardown();
+        this.clearMediaSessionMetadata();
         this.elements.container.classList.add("hidden");
         this.renderLoadingState();
     }
@@ -243,5 +245,34 @@ export class AudioController {
             cleanup();
         }
         this.cleanups = [];
+    }
+
+    /** Publishes lock-screen metadata for the currently active POI audio. */
+    private updateMediaSessionMetadata(poi: POI) {
+        if (!("mediaSession" in navigator) || typeof MediaMetadata === "undefined") {
+            return;
+        }
+
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: poi.title,
+            artist: "YVML",
+            album: "Interactive Map",
+            artwork: poi.imageName
+                ? [
+                      {
+                          src: `${import.meta.env.BASE_URL}images/${poi.imageName}`,
+                      },
+                  ]
+                : [],
+        });
+    }
+
+    /** Clears lock-screen metadata so the previous POI does not linger. */
+    private clearMediaSessionMetadata() {
+        if (!("mediaSession" in navigator)) {
+            return;
+        }
+
+        navigator.mediaSession.metadata = null;
     }
 }
