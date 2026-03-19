@@ -33,9 +33,22 @@ const droneLayer = tileLayer(
         detectRetina: true,
     },
 );
+const newDronLayer = tileLayer(
+    `${import.meta.env.BASE_URL}new-tiles/{z}/{x}/{y}.jpg`,
+    {
+        minZoom: 18,
+        maxZoom: 23,
+        maxNativeZoom: 23,
+        tileSize: 256,
+        errorTileUrl: `${import.meta.env.BASE_URL}/images/logo/logo-small.jpg`,
+        edgeBufferTiles: 1,
+        detectRetina: true,
+    },
+);
 
 export const tileLayers = {
     osm: osmLayer,
     satellite: satelliteLayer,
     drone: droneLayer,
+    newDrone: newDronLayer,
 };
