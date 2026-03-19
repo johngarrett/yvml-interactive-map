@@ -1,12 +1,12 @@
 import { debug, info } from "../utils";
 import type { LocationPoint } from "./types";
 import { Observable } from "../observable";
-import { getConfig } from "../config";
+import { getConfigStore } from "../config";
 
 export class LocationTracker extends Observable<LocationPoint> {
     constructor() {
         super();
-        getConfig().addListener(({ key, value }) => {
+        getConfigStore().addListener(({ key, value }) => {
             if (key === "hasGrantedLocationAccess") {
                 if (value === true) {
                     debug("[LocationTracker] hasGrantedLocationAccess changed");
@@ -56,13 +56,15 @@ export class LocationTracker extends Observable<LocationPoint> {
         if (document.hidden) {
             this.stop();
         } else {
-            this.start();
+            if (getConfigStore().config.hasGrantedLocationAccess) {
+                this.start();
+            }
         }
     };
 
     public handlePosition = (position: GeolocationPosition) => {
         const { latitude, longitude, accuracy } = position.coords;
-        const bounds = getConfig().getBounds();
+        const bounds = getConfigStore().getBounds();
         if (bounds && !bounds.contains([latitude, longitude])) {
             info(
                 "[LocationTracker] location outside bounds, stopping tracking",
