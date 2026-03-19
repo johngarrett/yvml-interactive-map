@@ -10,6 +10,11 @@
   <title>YVML Map</title>
 
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    .settings-feature-flag-container {
+      height: 100px; /* Adjust the height as needed */
+    }
+  </style>
 </head>
 
 <body>
@@ -41,7 +46,7 @@
 
       <div id="settings-feature-flags">
         <h4>Feature Flags</h4>
-        <div id="settings-feature-flags-list">
+        <div id="settings-feature-flags-list" class="settings-feature-flag-container flex flex-col gap-2">
         </div>
       </div>
 
