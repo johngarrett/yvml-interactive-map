@@ -14,7 +14,7 @@ export type Config = {
     features: Record<FeatureKey, FeatureConfig>;
     bounds?: L.LatLngBounds;
     hasGrantedLocationAccess: boolean;
-} /*& Record<Exclude<string, "features" | "bounds">, unknown>*/;
+};
 
 export type FeatureUpdateEvent = {
     key: "features";
