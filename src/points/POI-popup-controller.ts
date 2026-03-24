@@ -4,12 +4,12 @@ import { debug, getElementOrThrow, info } from "../utils";
 import { AudioController } from "./audio-controller";
 
 /**
- * Top-level coordinator for POI popup content.
+ * Owns the popup UI for the active POI.
  *
- * Audio stack breakdown:
- * - POIPopupController shows and hides popup content for the active POI.
- * - AudioController owns the custom player UI inside the popup.
- * - AudioElement wraps the backing HTML audio node and handles media lifecycle.
+ * Responsibilities:
+ * - show and hide popup content for the active POI
+ * - populate popup title and image state
+ * - coordinate popup audio setup and teardown
  *
  * Provenance:
  * - the current custom POI audio player integration was AI-generated
@@ -58,9 +58,7 @@ export class POIPopupController {
         });
     }
 
-    /**
-     * called whenever POITracker sees a switch
-     */
+    /** Called when POITracker selects or switches to a POI. */
     display(poi: POI) {
         if (this.active?.poi && poi.id !== this.active.poi?.id) {
             info(
@@ -71,8 +69,6 @@ export class POIPopupController {
         }
 
         this.active = { poi: poi };
-
-        // --------- configure popup
 
         this.elements.title.textContent = poi.title;
 
@@ -101,7 +97,6 @@ export class POIPopupController {
     }
 
     close() {
-        // TODO: hidden check here?
         this.elements.container.classList.add("hidden");
         this.hidden = true;
 

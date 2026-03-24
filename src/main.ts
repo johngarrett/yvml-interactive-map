@@ -50,9 +50,13 @@ const locationController = new LocationController({
 });
 
 /**
- * controls showing the active POI popup
+ * popup/audio controller for the currently active POI
  */
 new POIPopupController({ poiTracker });
+
+/**
+ * on-map marker layer for POIs
+ */
 const poiMarkerController = new POIMarkerController({ poiTracker, POIs });
 
 /**

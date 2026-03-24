@@ -4,6 +4,14 @@ import { getElementOrThrow } from "../utils";
 import type { POITracker } from "./POI-tracker";
 import { markerIdForPOI, poiMarker } from "./poi-marker";
 
+/**
+ * Owns the Leaflet marker layer for POIs.
+ *
+ * Responsibilities:
+ * - create the on-map POI markers
+ * - translate marker clicks into POITracker selections
+ * - apply persistent selected-marker styling when POITracker changes
+ */
 export class POIMarkerController {
     constructor({
         poiTracker,
@@ -24,6 +32,7 @@ export class POIMarkerController {
             }),
         );
 
+        // Marker styling is driven from POITracker so map state stays out of the popup controller.
         poiTracker.addListener((activePOI) => {
             if (activePOI) {
                 const nextMarker = getElementOrThrow({
