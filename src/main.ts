@@ -102,23 +102,17 @@ const map = initMap({
     },
 });
 
+poiMarkerController.updateForZoom(map.getZoom());
+map.on("zoomend", () => {
+    poiMarkerController.updateForZoom(map.getZoom());
+});
+
 new MapMovementController({
     map,
     locationTracker,
     orientationTracker,
     configStore,
 });
-
-//const bounds = configStore.getBounds();
-//// TODO: temporary -- maybe setBounds
-//if (bounds) {
-//    L.rectangle(bounds, {
-//        color: "#ff3b30",
-//        weight: 2,
-//        fill: false,
-//        interactive: false,
-//    }).addTo(map);
-//}
 
 setInterval(() => {
     locationStore.saveToStorage();
@@ -129,6 +123,7 @@ document.addEventListener("visibilitychange", () => {
     // save location when the user minimizes
     locationStore.saveToStorage();
 
+    orientationTracker.handleVisibilityChange();
     locationTracker.handleVisibilityChange();
 });
 
