@@ -1,7 +1,16 @@
 import { type DivIcon, divIcon } from "leaflet";
 import type { POI } from "../types";
 
+/**
+ * Marker labels stay numeric until the map is zoomed in close enough that
+ * showing POI titles is more useful than preserving the compact circular form.
+ */
 export const POI_TITLE_ZOOM_THRESHOLD = 21;
+
+/**
+ * Label swaps are animated with a short fade so switching between number mode
+ * and title mode feels less abrupt during zoom changes.
+ */
 const MARKER_LABEL_FADE_DURATION_MS = 120;
 const markerFadeTimers = new WeakMap<HTMLElement, number>();
 
@@ -13,6 +22,9 @@ type IconConfiguration = {
 export const markerIdForPOI = (poi: Pick<POI, "id">): string =>
     `poi-marker-${poi.id}`;
 
+/**
+ * Returns the visible label for a marker at a given zoom level.
+ */
 const markerLabelForZoom = (
     config: IconConfiguration,
     zoomLevel: number,
@@ -31,6 +43,11 @@ export const poiMarker = (config: IconConfiguration): DivIcon =>
             `,
     });
 
+/**
+ * Updates the existing marker DOM in place so Leaflet marker instances,
+ * click handlers, and selected-marker styling remain intact across zoom-based
+ * label mode changes.
+ */
 export const updatePOIMarkerLabel = ({
     element,
     number,
