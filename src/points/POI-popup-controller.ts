@@ -1,15 +1,13 @@
-import { POITracker } from "../points";
+import type { POITracker } from "./POI-tracker";
 import type { POI } from "../types";
 import { debug, getElementOrThrow, info } from "../utils";
 import { AudioController } from "./audio-controller";
-import { markerIdForPOI, poiMarker } from "./poi-marker";
-import L from "leaflet";
 
 /**
  * Top-level coordinator for POI popup content.
  *
  * Audio stack breakdown:
- * - POIController shows and hides popup content for the active POI.
+ * - POIPopupController shows and hides popup content for the active POI.
  * - AudioController owns the custom player UI inside the popup.
  * - AudioElement wraps the backing HTML audio node and handles media lifecycle.
  *
@@ -17,27 +15,8 @@ import L from "leaflet";
  * - the current custom POI audio player integration was AI-generated
  * - review behavior carefully when changing popup/audio interactions
  */
-export class POIController {
-    constructor({
-        poiTracker,
-        POIs,
-    }: {
-        poiTracker: POITracker;
-        POIs: Array<POI>;
-    }) {
-        // add points to map
-        this.layer = L.layerGroup(
-            POIs.map((POI, index) => {
-                const { latitude, longitude } = POI.location;
-
-                return L.marker([latitude, longitude], {
-                    icon: poiMarker({ number: index + 1, POI }),
-                }).on("click", () => {
-                    poiTracker.select(POI);
-                });
-            }),
-        );
-
+export class POIPopupController {
+    constructor({ poiTracker }: { poiTracker: POITracker }) {
         getElementOrThrow({ id: "poi-popup-close" }).addEventListener(
             "click",
             () => {
@@ -69,7 +48,7 @@ export class POIController {
 
         poiTracker.addListener((activePOI) => {
             debug(
-                `[POIController] listener for poiTrackerInstance fired: ${activePOI}`,
+                `[POIPopupController] listener for poiTrackerInstance fired: ${activePOI}`,
             );
             if (activePOI) {
                 this.display(activePOI);
@@ -85,7 +64,7 @@ export class POIController {
     display(poi: POI) {
         if (this.active?.poi && poi.id !== this.active.poi?.id) {
             info(
-                `[POIController] switching from ${this.active.poi?.id} to ${poi.id}`,
+                `[POIPopupController] switching from ${this.active.poi?.id} to ${poi.id}`,
             );
 
             this.audioController.teardown();
@@ -93,15 +72,11 @@ export class POIController {
 
         this.active = { poi: poi };
 
-        // --------- configure marker
-
-        const poiMarker = getElementOrThrow({ id: markerIdForPOI(poi) });
-        poiMarker.style.opacity = "0.7";
-
         // --------- configure popup
 
         this.elements.title.textContent = poi.title;
 
+        // TODO: non optional
         if (poi.imageName) {
             this.elements.image.classList.add("poi-popup-image-loading");
             this.elements.image.removeAttribute("src");
@@ -146,7 +121,4 @@ export class POIController {
     };
 
     private audioController: AudioController;
-
-    // this holds the POIs
-    public layer: L.LayerGroup;
 }
