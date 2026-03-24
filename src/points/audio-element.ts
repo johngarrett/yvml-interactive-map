@@ -9,6 +9,9 @@ type AudioEventName =
     | "play"
     | "timeupdate";
 
+const RESTART_FROM_BEGINNING_THRESHOLD_SECONDS = 1;
+const RESTART_NEAR_END_THRESHOLD_SECONDS = 2;
+
 const getTimestampKey = (poi: POI) => {
     return `${poi.id}-timestamp`;
 };
@@ -58,7 +61,16 @@ export class AudioElement {
         this.mediaElement.load();
 
         const applyResumePosition = () => {
-            this.mediaElement.currentTime = savedTime;
+            this.mediaElement.currentTime = this.shouldRestartFromBeginning(
+                savedTime,
+            )
+                ? 0
+                : savedTime;
+
+            if (this.mediaElement.currentTime === 0) {
+                LocalStorageProvider.clear(timestampKey);
+            }
+
             this.mediaElement.removeEventListener(
                 "loadedmetadata",
                 applyResumePosition,
@@ -81,6 +93,7 @@ export class AudioElement {
 
     async togglePlayPause() {
         if (this.mediaElement.paused) {
+            this.resetToStartIfResumePointIsAtEdge();
             await this.mediaElement.play();
             return;
         }
@@ -137,8 +150,15 @@ export class AudioElement {
             return;
         }
 
+        const timestampKey = getTimestampKey(this.activePoi);
+
+        if (this.shouldRestartFromBeginning(this.mediaElement.currentTime)) {
+            LocalStorageProvider.clear(timestampKey);
+            return;
+        }
+
         LocalStorageProvider.set(
-            getTimestampKey(this.activePoi),
+            timestampKey,
             JSON.stringify(this.mediaElement.currentTime),
         );
     }
@@ -180,4 +200,35 @@ export class AudioElement {
     private activePoi?: POI;
 
     private mediaElement: HTMLAudioElement;
+
+    private resetToStartIfResumePointIsAtEdge() {
+        if (!this.shouldRestartFromBeginning(this.mediaElement.currentTime)) {
+            return;
+        }
+
+        this.mediaElement.currentTime = 0;
+
+        if (this.activePoi) {
+            LocalStorageProvider.clear(getTimestampKey(this.activePoi));
+        }
+    }
+
+    private shouldRestartFromBeginning(currentTime: number) {
+        if (!Number.isFinite(currentTime)) {
+            return true;
+        }
+
+        if (currentTime <= RESTART_FROM_BEGINNING_THRESHOLD_SECONDS) {
+            return true;
+        }
+
+        if (!Number.isFinite(this.mediaElement.duration)) {
+            return false;
+        }
+
+        return (
+            this.mediaElement.duration - currentTime <=
+            RESTART_NEAR_END_THRESHOLD_SECONDS
+        );
+    }
 }
