@@ -123,6 +123,7 @@ document.addEventListener("visibilitychange", () => {
     // save location when the user minimizes
     locationStore.saveToStorage();
 
+    orientationTracker.handleVisibilityChange();
     locationTracker.handleVisibilityChange();
 });
 

@@ -27,6 +27,7 @@ export class OrientationTracker extends Observable<OrientationData> {
                     const permission =
                         await DeviceOrientationEvent.requestPermission();
                     if (permission === "granted") {
+                        this.hasGrantedOrientationAccess = true;
                         this.startOrientationTracking();
                         return true;
                     }
@@ -36,12 +37,22 @@ export class OrientationTracker extends Observable<OrientationData> {
                     return false;
                 }
             } else {
+                this.hasGrantedOrientationAccess = true;
                 this.startOrientationTracking();
                 return true;
             }
         } catch (e) {
             warn("[OrientationTracker] unexpected error", e);
             return false;
+        }
+    };
+
+    public handleVisibilityChange = (): void => {
+        debug("[OrientationTracker] handleVisibilityChange");
+        if (document.hidden) {
+            this.stopOrientationTracking();
+        } else if (this.hasGrantedOrientationAccess) {
+            this.startOrientationTracking();
         }
     };
 
@@ -197,6 +208,7 @@ export class OrientationTracker extends Observable<OrientationData> {
     };
 
     private isTracking = false;
+    private hasGrantedOrientationAccess = false;
     private currentHeading: number | undefined;
     private targetHeading: number | undefined;
     private animationFrame: number | undefined;
