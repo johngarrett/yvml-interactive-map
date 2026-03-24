@@ -36,12 +36,22 @@ export class POIMarkerController {
         this.layer = L.layerGroup(this.markers.map(({ marker }) => marker));
 
         poiTracker.addListener((activePOI) => {
+            if (this.activeMarkerElement) {
+                this.activeMarkerElement.classList.remove("poi-marker-selected");
+                this.activeMarkerElement.style.opacity = "";
+            }
+
             if (activePOI) {
                 const nextMarker = getElementOrThrow({
                     id: markerIdForPOI(activePOI),
                 });
+                nextMarker.classList.add("poi-marker-selected");
                 nextMarker.style.opacity = "0.7";
+                this.activeMarkerElement = nextMarker;
+                return;
             }
+
+            this.activeMarkerElement = undefined;
         });
     }
 
@@ -73,5 +83,6 @@ export class POIMarkerController {
         number: number;
         marker: L.Marker;
     }>;
+    private activeMarkerElement: HTMLElement | undefined;
     private lastShowTitle: boolean | undefined;
 }
