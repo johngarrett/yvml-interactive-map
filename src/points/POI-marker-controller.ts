@@ -2,7 +2,12 @@ import L from "leaflet";
 import type { POI } from "../types";
 import { getElementOrThrow } from "../utils";
 import type { POITracker } from "./POI-tracker";
-import { markerIdForPOI, poiMarker, updatePOIMarkerLabel } from "./poi-marker";
+import {
+    markerIdForPOI,
+    poiMarker,
+    POI_TITLE_ZOOM_THRESHOLD,
+    updatePOIMarkerLabel,
+} from "./poi-marker";
 
 /**
  * Owns the Leaflet marker layer for POIs.
@@ -41,6 +46,15 @@ export class POIMarkerController {
     }
 
     updateForZoom(zoomLevel: number) {
+        const showTitle = zoomLevel >= POI_TITLE_ZOOM_THRESHOLD;
+
+        // Zoom changes within the same label mode don't need any DOM work.
+        if (this.lastShowTitle === showTitle) {
+            return;
+        }
+
+        this.lastShowTitle = showTitle;
+
         this.markers.forEach(({ POI, number }) => {
             const element = getElementOrThrow({ id: markerIdForPOI(POI) });
 
@@ -59,4 +73,5 @@ export class POIMarkerController {
         number: number;
         marker: L.Marker;
     }>;
+    private lastShowTitle: boolean | undefined;
 }
