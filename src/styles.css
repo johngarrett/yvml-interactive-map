@@ -13,11 +13,6 @@
   border-radius: 999px;
   white-space: nowrap;
   line-height: 1;
-  opacity: 1;
-  transform: scale(1);
-  transition:
-    opacity 120ms cubic-bezier(0.25, 0.1, 0.25, 1),
-    transform 120ms cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
 .poi-marker-number {
@@ -30,11 +25,6 @@
   max-width: min(220px, 60vw);
   padding-left: 0.6rem;
   padding-right: 0.6rem;
-}
-
-.poi-marker-fading {
-  opacity: 0.2;
-  transform: scale(0.985);
 }
 
 .hidden {

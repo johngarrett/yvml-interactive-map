@@ -7,13 +7,6 @@ import type { POI } from "../types";
  */
 export const POI_TITLE_ZOOM_THRESHOLD = 21;
 
-/**
- * Label swaps are animated with a short fade so switching between number mode
- * and title mode feels less abrupt during zoom changes.
- */
-const MARKER_LABEL_FADE_DURATION_MS = 120;
-const markerFadeTimers = new WeakMap<HTMLElement, number>();
-
 type IconConfiguration = {
     POI: Pick<POI, "id" | "title">;
     number: number;
@@ -69,24 +62,7 @@ export const updatePOIMarkerLabel = ({
         return;
     }
 
-    const existingTimer = markerFadeTimers.get(element);
-    if (existingTimer) {
-        window.clearTimeout(existingTimer);
-    }
-
-    element.classList.add("poi-marker-fading");
-
-    const timer = window.setTimeout(() => {
-        element.textContent = nextText;
-        element.classList.toggle("poi-marker-title", showTitle);
-        element.classList.toggle("poi-marker-number", !showTitle);
-
-        requestAnimationFrame(() => {
-            element.classList.remove("poi-marker-fading");
-        });
-
-        markerFadeTimers.delete(element);
-    }, MARKER_LABEL_FADE_DURATION_MS);
-
-    markerFadeTimers.set(element, timer);
+    element.textContent = nextText;
+    element.classList.toggle("poi-marker-title", showTitle);
+    element.classList.toggle("poi-marker-number", !showTitle);
 };
