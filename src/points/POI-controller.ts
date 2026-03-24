@@ -1,8 +1,9 @@
-import { markerIdForPOI } from "../map/components/poi-marker";
 import { POITracker } from "../points";
 import type { POI } from "../types";
 import { debug, getElementOrThrow, info } from "../utils";
 import { AudioController } from "./audio-controller";
+import { markerIdForPOI, poiMarker } from "./poi-marker";
+import L from "leaflet";
 
 /**
  * Top-level coordinator for POI popup content.
@@ -17,12 +18,31 @@ import { AudioController } from "./audio-controller";
  * - review behavior carefully when changing popup/audio interactions
  */
 export class POIController {
-    constructor(params: { poiTracker: POITracker }) {
+    constructor({
+        poiTracker,
+        POIs,
+    }: {
+        poiTracker: POITracker;
+        POIs: Array<POI>;
+    }) {
+        // add points to map
+        this.layer = L.layerGroup(
+            POIs.map((POI, index) => {
+                const { latitude, longitude } = POI.location;
+
+                return L.marker([latitude, longitude], {
+                    icon: poiMarker({ number: index + 1, POI }),
+                }).on("click", () => {
+                    poiTracker.select(POI);
+                });
+            }),
+        );
+
         getElementOrThrow({ id: "poi-popup-close" }).addEventListener(
             "click",
             () => {
                 // when the user hits close, they're deselecting the active
-                params.poiTracker.deselectActive();
+                poiTracker.deselectActive();
             },
         );
 
@@ -47,7 +67,7 @@ export class POIController {
         };
         this.audioController = new AudioController();
 
-        params.poiTracker.addListener((activePOI) => {
+        poiTracker.addListener((activePOI) => {
             debug(
                 `[POIController] listener for poiTrackerInstance fired: ${activePOI}`,
             );
@@ -126,4 +146,7 @@ export class POIController {
     };
 
     private audioController: AudioController;
+
+    // this holds the POIs
+    public layer: L.LayerGroup;
 }

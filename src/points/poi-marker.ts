@@ -1,5 +1,5 @@
 import { type DivIcon, divIcon } from "leaflet";
-import type { POI } from "../../types";
+import type { POI } from "../types";
 
 type IconConfiguration = {
     POI: Pick<POI, "id">;

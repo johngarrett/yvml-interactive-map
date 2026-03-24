@@ -51,7 +51,7 @@ const locationController = new LocationController({
 /**
  * controls showing the popup and marking the circles
  */
-new POIController({ poiTracker });
+const poiController = new POIController({ poiTracker, POIs });
 
 /**
  * controls collision between live user location and POI bounds
@@ -86,7 +86,11 @@ const map = initMap({
         },
     },
     // TODO: baseclass for exposing a layer?
-    additionalLayers: [locationController.layer, boundsController.layer],
+    additionalLayers: [
+        locationController.layer,
+        boundsController.layer,
+        poiController.layer,
+    ],
     providers: {
         poiTracker,
         locationController,
