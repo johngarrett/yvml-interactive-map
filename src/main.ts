@@ -3,7 +3,8 @@ import { initMap } from "./map/map";
 import {
     POIBoundsController,
     POICollisionController,
-    POIController,
+    POIMarkerController,
+    POIPopupController,
     POIs,
     POITracker,
 } from "./points";
@@ -49,9 +50,14 @@ const locationController = new LocationController({
 });
 
 /**
- * controls showing the popup and marking the circles
+ * popup/audio controller for the currently active POI
  */
-new POIController({ poiTracker });
+new POIPopupController({ poiTracker });
+
+/**
+ * on-map marker layer for POIs
+ */
+const poiMarkerController = new POIMarkerController({ poiTracker, POIs });
 
 /**
  * controls collision between live user location and POI bounds
@@ -68,7 +74,6 @@ new POICollisionController({
 const boundsController = new POIBoundsController({ POIs });
 
 const map = initMap({
-    POIs,
     config: {
         initialLocation: [34.181922, -116.414579],
         initialZoom: 21,
@@ -86,7 +91,11 @@ const map = initMap({
         },
     },
     // TODO: baseclass for exposing a layer?
-    additionalLayers: [locationController.layer, boundsController.layer],
+    additionalLayers: [
+        locationController.layer,
+        boundsController.layer,
+        poiMarkerController.layer,
+    ],
     providers: {
         poiTracker,
         locationController,
