@@ -36,22 +36,25 @@ export class POIMarkerController {
         this.layer = L.layerGroup(this.markers.map(({ marker }) => marker));
 
         poiTracker.addListener((activePOI) => {
+            /**
+             * this is the previously active marker, mark it as viewed
+             */
             if (this.activeMarkerElement) {
-                this.activeMarkerElement.classList.remove("poi-marker-selected");
-                this.activeMarkerElement.style.opacity = "";
+                this.activeMarkerElement.classList.remove(
+                    "poi-marker-selected",
+                );
+                this.activeMarkerElement.style.opacity = "0.7";
             }
 
-            if (activePOI) {
-                const nextMarker = getElementOrThrow({
-                    id: markerIdForPOI(activePOI),
-                });
-                nextMarker.classList.add("poi-marker-selected");
-                nextMarker.style.opacity = "0.7";
-                this.activeMarkerElement = nextMarker;
+            if (!activePOI) {
+                this.activeMarkerElement = undefined;
                 return;
             }
 
-            this.activeMarkerElement = undefined;
+            this.activeMarkerElement = getElementOrThrow({
+                id: markerIdForPOI(activePOI),
+            });
+            this.activeMarkerElement.classList.add("poi-marker-selected");
         });
     }
 

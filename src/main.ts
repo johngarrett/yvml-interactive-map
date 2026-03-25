@@ -1,17 +1,22 @@
-import { tileLayers } from "./map/layers";
-import { initMap } from "./map/map";
+import { initConfig, getConfigStore } from "./config";
+import { ConsoleTracker } from "./console";
 import {
-    POIBoundsController,
-    POICollisionController,
-    POIMarkerController,
-    POIPopupController,
-    POIs,
+    LocationTracker,
+    OrientationTracker,
+    LocationStore,
+    LocationController,
+} from "./location";
+import { initMap, tileLayers, MapMovementController } from "./map";
+import {
     POITracker,
+    POIPopupController,
+    POIMarkerController,
+    POIs,
+    POICollisionController,
+    POIBoundsController,
 } from "./points";
 import { SettingsMenu } from "./settings";
-import { LocationStore, LocationTracker, OrientationTracker } from "./location";
-import { ConsoleTracker } from "./console";
-import { getConfigStore, initConfig } from "./config";
+import { debug } from "./utils";
 
 import "./styles.css"; // TODO: remove tailwind and import normally
 
@@ -20,10 +25,6 @@ import "leaflet-rotate"; // allows map rotation
 import "leaflet.offline"; // TODO: remove
 
 import "leaflet-edgebuffer"; // prevents tile flashing
-
-import { debug } from "./utils";
-import { LocationController } from "./location/location-controller";
-import { MapMovementController } from "./map/map-movement-controller";
 
 initConfig();
 const configStore = getConfigStore();
@@ -77,7 +78,7 @@ const map = initMap({
     config: {
         initialLocation: [34.181922, -116.414579],
         initialZoom: 21,
-        defaultLayer: tileLayers.drone,
+        defaultLayer: tileLayers.newDrone,
         tileLayers,
         mapOptions: {
             rotate: true,
