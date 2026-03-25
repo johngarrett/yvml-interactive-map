@@ -78,7 +78,7 @@ const map = initMap({
     config: {
         initialLocation: [34.181922, -116.414579],
         initialZoom: 21,
-        defaultLayer: tileLayers.drone,
+        defaultLayer: tileLayers.newDrone,
         tileLayers,
         mapOptions: {
             rotate: true,
