@@ -1,18 +1,19 @@
-import { getConfig, initConfig } from "./config";
+import { initConfig, getConfigStore } from "./config";
 import { ConsoleTracker } from "./console";
 import {
-    LocationController,
-    LocationStore,
     LocationTracker,
     OrientationTracker,
+    LocationStore,
+    LocationController,
 } from "./location";
-import { initMap, MapMovementController, tileLayers } from "./map";
+import { initMap, tileLayers, MapMovementController } from "./map";
 import {
-    POIBoundsController,
-    POICollisionController,
-    POIController,
-    POIs,
     POITracker,
+    POIPopupController,
+    POIMarkerController,
+    POIs,
+    POICollisionController,
+    POIBoundsController,
 } from "./points";
 import { SettingsMenu } from "./settings";
 import { debug } from "./utils";
@@ -26,7 +27,7 @@ import "leaflet.offline"; // TODO: remove
 import "leaflet-edgebuffer"; // prevents tile flashing
 
 initConfig();
-const configStore = getConfig();
+const configStore = getConfigStore();
 
 new ConsoleTracker();
 new SettingsMenu();
@@ -50,9 +51,14 @@ const locationController = new LocationController({
 });
 
 /**
- * controls showing the popup and marking the circles
+ * popup/audio controller for the currently active POI
  */
-new POIController({ poiTracker });
+new POIPopupController({ poiTracker });
+
+/**
+ * on-map marker layer for POIs
+ */
+const poiMarkerController = new POIMarkerController({ poiTracker, POIs });
 
 /**
  * controls collision between live user location and POI bounds
@@ -69,7 +75,6 @@ new POICollisionController({
 const boundsController = new POIBoundsController({ POIs });
 
 const map = initMap({
-    POIs,
     config: {
         initialLocation: [34.181922, -116.414579],
         initialZoom: 21,
@@ -87,11 +92,20 @@ const map = initMap({
         },
     },
     // TODO: baseclass for exposing a layer?
-    additionalLayers: [locationController.layer, boundsController.layer],
+    additionalLayers: [
+        locationController.layer,
+        boundsController.layer,
+        poiMarkerController.layer,
+    ],
     providers: {
         poiTracker,
         locationController,
     },
+});
+
+poiMarkerController.updateForZoom(map.getZoom());
+map.on("zoomend", () => {
+    poiMarkerController.updateForZoom(map.getZoom());
 });
 
 new MapMovementController({
@@ -101,17 +115,6 @@ new MapMovementController({
     configStore,
 });
 
-//const bounds = configStore.getBounds();
-//// TODO: temporary -- maybe setBounds
-//if (bounds) {
-//    L.rectangle(bounds, {
-//        color: "#ff3b30",
-//        weight: 2,
-//        fill: false,
-//        interactive: false,
-//    }).addTo(map);
-//}
-
 setInterval(() => {
     locationStore.saveToStorage();
 }, 15000); // every 15 seconds, save location data to storage
@@ -120,6 +123,9 @@ document.addEventListener("visibilitychange", () => {
     debug("[main] handleVisibilityChange");
     // save location when the user minimizes
     locationStore.saveToStorage();
+
+    orientationTracker.handleVisibilityChange();
+    locationTracker.handleVisibilityChange();
 });
 
 window.addEventListener("beforeunload", () => {
