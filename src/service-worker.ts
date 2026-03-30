@@ -7,6 +7,7 @@ import {
     getCacheableAssetPathPrefixes,
     isExpiredResponse,
 } from "./cache/shared";
+import { debug } from "./utils/logger";
 
 declare const self: ServiceWorkerGlobalScope;
 
@@ -47,14 +48,21 @@ const buildCachedResponse = async (response: Response) => {
 
 /** Fetches a fresh asset and stores it in CacheStorage when the response is usable. */
 const fetchAndCache = async (request: Request, cache: Cache) => {
+    debug("[asset-cache-sw] fetching from network", request.url);
     const networkResponse = await fetch(request);
 
     if (!networkResponse.ok) {
+        debug(
+            "[asset-cache-sw] network response not cached",
+            request.url,
+            `status=${networkResponse.status}`,
+        );
         return networkResponse;
     }
 
     const cachedResponse = await buildCachedResponse(networkResponse);
     await cache.put(request, cachedResponse);
+    debug("[asset-cache-sw] stored response in cache", request.url);
 
     return networkResponse;
 };
@@ -65,25 +73,43 @@ const handleAssetRequest = async (request: Request) => {
     const cachedResponse = await cache.match(request);
 
     if (cachedResponse && !isExpiredResponse(cachedResponse)) {
+        debug("[asset-cache-sw] cache hit", request.url);
         return cachedResponse;
+    }
+
+    if (cachedResponse) {
+        debug("[asset-cache-sw] cache entry expired, refreshing", request.url);
+    } else {
+        debug("[asset-cache-sw] cache miss", request.url);
     }
 
     try {
         return await fetchAndCache(request, cache);
     } catch (error) {
         if (cachedResponse) {
+            debug(
+                "[asset-cache-sw] network failed, serving stale cached response",
+                request.url,
+            );
             return cachedResponse;
         }
 
+        debug(
+            "[asset-cache-sw] network failed with no cached fallback",
+            request.url,
+            error,
+        );
         throw error;
     }
 };
 
 self.addEventListener("install", (event) => {
+    debug("[asset-cache-sw] install");
     event.waitUntil(self.skipWaiting());
 });
 
 self.addEventListener("activate", (event) => {
+    debug("[asset-cache-sw] activate");
     event.waitUntil(self.clients.claim());
 });
 
@@ -104,6 +130,7 @@ self.addEventListener("fetch", (event) => {
         return;
     }
 
+    debug("[asset-cache-sw] intercepting cacheable request", requestUrl.pathname);
     event.respondWith(handleAssetRequest(event.request));
 });
 

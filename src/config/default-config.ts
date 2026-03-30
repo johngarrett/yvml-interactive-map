@@ -2,13 +2,6 @@ import L from "leaflet";
 import { defaultFeatures } from "./default-features";
 import type { Config } from "./types";
 
-/**
- * Default app config.
- *
- * Provenance:
- * - the surrounding config defaults are app-owned
- * - cache TTL is intentionally not part of app config
- */
 export const defaultConfig = {
     features: defaultFeatures,
     bounds: L.latLngBounds(

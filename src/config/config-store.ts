@@ -10,13 +10,6 @@ import {
 } from "./types";
 import type L from "leaflet";
 
-/**
- * In-memory config store.
- *
- * Provenance:
- * - this store remains intentionally simple and non-persistent
- * - review event behavior carefully before adding persistence again
- */
 export class ConfigStore extends Observable<ConfigEvent> {
     constructor(public readonly config: Config) {
         super();
