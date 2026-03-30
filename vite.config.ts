@@ -6,6 +6,6 @@ export default defineConfig({
         open: true,
         host: true,
     },
-    base: "/yvml-interactive-map/",
+    base: "/map/",
     plugins: [tailwindcss()],
 });
