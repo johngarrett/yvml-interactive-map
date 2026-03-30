@@ -14,9 +14,15 @@ export const registerAssetCacheServiceWorker = async () => {
         return;
     }
 
-    const serviceWorkerUrl = new URL("../service-worker.ts", import.meta.url);
+    const serviceWorkerUrl = import.meta.env.DEV
+        ? new URL("../service-worker.ts", import.meta.url)
+        : new URL(
+              `${import.meta.env.BASE_URL}service-worker.js`,
+              window.location.origin,
+          );
+    const serviceWorkerScope = import.meta.env.BASE_URL;
     debug(
-        `[asset-cache] registering service worker at ${serviceWorkerUrl.pathname}`,
+        `[asset-cache] registering service worker at ${serviceWorkerUrl.pathname} with scope ${serviceWorkerScope}`,
     );
 
     try {
@@ -24,6 +30,7 @@ export const registerAssetCacheServiceWorker = async () => {
             serviceWorkerUrl,
             {
                 type: "module",
+                scope: serviceWorkerScope,
             },
         );
         debug(

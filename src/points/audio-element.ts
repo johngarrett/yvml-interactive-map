@@ -43,12 +43,17 @@ export class AudioElement {
     }
 
     configure(poi: POI) {
+        this.loadVersion += 1;
+
         if (this.activePoi?.id !== poi.id) {
             this.saveCurrentTime();
         }
 
         this.activePoi = poi;
         this.mediaElement.pause();
+        this.revokeActiveObjectUrl();
+        this.mediaElement.removeAttribute("src");
+        this.mediaElement.load();
 
         const timestampKey = getTimestampKey(poi);
         const savedTime = LocalStorageProvider.has(timestampKey)
@@ -59,9 +64,15 @@ export class AudioElement {
             debug("AudioElement: no timestampKey found, will start at 0");
         }
 
-        this.mediaElement.src = `${import.meta.env.BASE_URL}audio/${poi.audioName}`;
-        this.mediaElement.load();
+        void this.loadAudioSource({
+            poi,
+            savedTime,
+            timestampKey,
+            loadVersion: this.loadVersion,
+        });
+    }
 
+    private applyResumePosition(savedTime: number, timestampKey: string) {
         const applyResumePosition = () => {
             this.mediaElement.currentTime = this.shouldRestartFromBeginning(
                 savedTime,
@@ -186,6 +197,7 @@ export class AudioElement {
             return;
         }
 
+        this.loadVersion += 1;
         info(`AudioElement: teardown on ${this.activePoi.title}`);
 
         if (!this.mediaElement.paused) {
@@ -194,6 +206,7 @@ export class AudioElement {
         }
 
         this.saveCurrentTime();
+        this.revokeActiveObjectUrl();
         this.mediaElement.removeAttribute("src");
         this.mediaElement.load();
         this.activePoi = undefined;
@@ -202,6 +215,8 @@ export class AudioElement {
     private activePoi?: POI;
 
     private mediaElement: HTMLAudioElement;
+    private activeObjectUrl?: string;
+    private loadVersion: number = 0;
 
     /** Resets paused playback to 0 when the saved position is effectively at an edge. */
     private resetToStartIfResumePointIsAtEdge() {
@@ -238,5 +253,73 @@ export class AudioElement {
             this.mediaElement.duration - currentTime <=
             RESTART_NEAR_END_THRESHOLD_SECONDS
         );
+    }
+
+    /**
+     * Loads the active POI audio as a full blob-backed object URL so playback
+     * does not depend on browser byte-range requests.
+     *
+     * Provenance:
+     * - this blob-loading path was AI-generated
+     * - review lifecycle and cleanup carefully before changing audio fetch behavior
+     */
+    private async loadAudioSource(params: {
+        poi: POI;
+        savedTime: number;
+        timestampKey: string;
+        loadVersion: number;
+    }) {
+        const { poi, savedTime, timestampKey, loadVersion } = params;
+        const sourceUrl = `${import.meta.env.BASE_URL}audio/${poi.audioName}`;
+
+        debug(`[AudioElement] fetching audio source for ${poi.id} from ${sourceUrl}`);
+
+        try {
+            const response = await fetch(sourceUrl);
+
+            if (!response.ok) {
+                throw new Error(`audio fetch failed with status ${response.status}`);
+            }
+
+            const blob = await response.blob();
+
+            if (
+                loadVersion !== this.loadVersion ||
+                this.activePoi?.id !== poi.id
+            ) {
+                debug(
+                    `[AudioElement] discarding stale fetched audio source for ${poi.id}`,
+                );
+                return;
+            }
+
+            const objectUrl = URL.createObjectURL(blob);
+            this.activeObjectUrl = objectUrl;
+            this.mediaElement.src = objectUrl;
+            this.mediaElement.load();
+            this.applyResumePosition(savedTime, timestampKey);
+        } catch (error) {
+            debug(`[AudioElement] audio fetch failed for ${poi.id}: ${error}`);
+
+            if (
+                loadVersion !== this.loadVersion ||
+                this.activePoi?.id !== poi.id
+            ) {
+                return;
+            }
+
+            this.mediaElement.src = sourceUrl;
+            this.mediaElement.load();
+            this.applyResumePosition(savedTime, timestampKey);
+        }
+    }
+
+    private revokeActiveObjectUrl() {
+        if (!this.activeObjectUrl) {
+            return;
+        }
+
+        URL.revokeObjectURL(this.activeObjectUrl);
+        this.activeObjectUrl = undefined;
     }
 }

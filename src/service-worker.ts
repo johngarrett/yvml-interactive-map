@@ -60,6 +60,14 @@ const fetchAndCache = async (request: Request, cache: Cache) => {
         return networkResponse;
     }
 
+    if (networkResponse.status === 206) {
+        debug(
+            "[asset-cache-sw] skipping cache storage for partial response",
+            request.url,
+        );
+        return networkResponse;
+    }
+
     const cachedResponse = await buildCachedResponse(networkResponse);
     await cache.put(request, cachedResponse);
     debug("[asset-cache-sw] stored response in cache", request.url);
@@ -69,6 +77,17 @@ const fetchAndCache = async (request: Request, cache: Cache) => {
 
 /** Implements cache-first reads with TTL refresh and stale-on-error fallback. */
 const handleAssetRequest = async (request: Request) => {
+    const rangeHeader = request.headers.get("range");
+
+    if (rangeHeader) {
+        debug(
+            "[asset-cache-sw] bypassing cache for byte-range request",
+            request.url,
+            rangeHeader,
+        );
+        return fetch(request);
+    }
+
     const cache = await getCache();
     const cachedResponse = await cache.match(request);
 
