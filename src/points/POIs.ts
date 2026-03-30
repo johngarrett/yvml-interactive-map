@@ -24,6 +24,7 @@ export const POIs: Array<POI> = [
         title: "Quonset",
         id: "quonset",
         imageName: "quonset.jpg",
+        audioName: "quonset.m4a",
         location: {
             latitude: 34.181775,
             longitude: -116.414544,
@@ -78,6 +79,7 @@ export const POIs: Array<POI> = [
     {
         title: "Sleeping Library",
         imageName: "sleeping-library.jpg",
+        audioName: "sleeping-library.m4a",
         id: "library",
         location: {
             latitude: 34.181793,
@@ -104,6 +106,7 @@ export const POIs: Array<POI> = [
         title: "Lazy Eye Gallery",
         id: "gallery",
         imageName: "gallery.jpg",
+        audioName: "gallery.m4a",
         location: {
             latitude: 34.181975,
             longitude: -116.414294,
@@ -131,6 +134,7 @@ export const POIs: Array<POI> = [
         title: "Recording Studio",
         id: "recording-studio",
         imageName: "recording-studio.jpg",
+        audioName: "recording-studio.m4a",
         location: {
             latitude: 34.181888,
             longitude: -116.414429,
@@ -144,6 +148,7 @@ export const POIs: Array<POI> = [
         title: "Sculpture Garden",
         id: "sculpture-garden",
         imageName: "sculpture-garden.jpg",
+        audioName: "sculpture-garden.m4a",
         location: {
             latitude: 34.18223,
             longitude: -116.41462,

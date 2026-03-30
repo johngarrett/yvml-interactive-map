@@ -9,6 +9,5 @@ export type POI = {
     };
     bounds: L.LatLngBounds; // southWest -> northEast
     imageName?: string;
-    // TODO: non-optional
-    audioName?: string;
+    audioName: string;
 };
