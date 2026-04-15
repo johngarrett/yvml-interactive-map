@@ -85,6 +85,8 @@ export class LocationStore {
         );
     };
 
+    private static readonly TTL_MS = 60 * 60 * 1000; // 1 hour
+
     private static readFromStorage = (): Array<LocationPoint> | undefined => {
         const localData = LocalStorageProvider.get(StorageKeys.locationHistory);
 
@@ -93,9 +95,21 @@ export class LocationStore {
             return undefined;
         }
 
-        const parsedData = JSON.parse(localData);
-        debug(parsedData);
-        return parsedData;
+        const data = JSON.parse(localData) as Array<LocationPoint>;
+        const lastPoint = data[data.length - 1];
+
+        if (lastPoint) {
+            const age = Date.now() - lastPoint.timestamp;
+            if (age > LocationStore.TTL_MS) {
+                debug(`[LocationStore] readFromStorage: data expired (${Math.round(age / 60000)} min old), clearing`);
+                LocalStorageProvider.clear(StorageKeys.locationHistory);
+                return undefined;
+            }
+            debug(`[LocationStore] readFromStorage: data is ${Math.round(age / 60000)} min old, within TTL`);
+        }
+
+        debug(data);
+        return data;
     };
 
     private data: Array<LocationPoint> = [];
