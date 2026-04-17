@@ -47,9 +47,10 @@ export const initMap = (params: MapParameters) => {
     map.on("zoom", locationController.zoomAnimationCallback);
 
     // add UI widget for holding onto layers
-    if (config.tileLayers /* TODO: && buildFlag === "debug" */) {
-        L.control.layers(config.tileLayers).addTo(map);
-    }
+    // TODO: add flag
+    //if (config.tileLayers /* TODO: && buildFlag === "debug" */) {
+    //    L.control.layers(config.tileLayers).addTo(map);
+    //}
 
     // Safari (macOS/iOS) can change viewport when the location permission dialog
     // appears or closes, so Leaflet’s cached size becomes wrong. Recompute it.
