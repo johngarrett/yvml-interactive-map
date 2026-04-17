@@ -122,10 +122,18 @@ body {
    */
   font-size: 16px;
   height: 60px;
+
+
+  border-bottom-color: white;
+  border-bottom-width: 1px;
 }
 
 #navbar img {
   height: 50%;
+}
+
+#navbar-settings {
+  font-variant-emoji: text;
 }
 
 #map {
